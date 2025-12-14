@@ -1,0 +1,46 @@
+function diff=K_ss(XX,params)
+
+%Calculates the steady state capital 
+%Output:    diff: difference between the lhs and rhs of the equilibrium
+%                   condition (needs to be 0)
+%Input:     XX: vector of capital and l (K)
+%           params: structure of parameters
+
+%Created by Peter Karadi
+%June 2010
+
+K   =   XX(1);
+N   =   XX(2);
+
+%Creating variables from the params structure
+params_names     =   fieldnames(params);
+NN=length(params_names);
+for ii=1:NN
+    eval([params_names{ii} '=params.' params_names{ii} ';']);
+end;
+
+%Calculating steady state values
+YH  =   K^alpha*N^(1-alpha);
+G   =   G_over_Y*YH;
+I   =   delta*K;
+C   =   YH-I-G;
+R   =   1/beta;
+Rk  =   alpha*YH/K+1-delta;
+RkmR=   Rk-R;
+
+%Calculating the leverages (now only the lower leverages: need to check outcomes with low-high case)
+aaL     =   lambdaL*beta*thetaL*RkmR;
+bbL     =   -(1-thetaL)*(lambdaL-beta*RkmR);
+ccL     =   (1-thetaL);
+phiL    =   (-bbL-sqrt(bbL^2-4*aaL*ccL))/(2*aaL);
+
+aaI     =   lambdaI*beta*thetaI*RkmR;
+bbI     =   -(1-thetaI)*(lambdaI-beta*RkmR);
+ccI     =   (1-thetaI);
+phiI    =   (-bbI-sqrt(bbI^2-4*aaI*ccI))/(2*aaI);
+
+NL      =   omegaL*K/(1-thetaL*(RkmR*phiL+R));
+NI      =   omegaI*K/(1-thetaI*(RkmR*phiI+R));
+
+diff(1)     =   chi*L^varphi-C^(-sigma)*(1-alpha)*YH/N;
+diff(2)     =   phiL*NL+phiI*NI-K;

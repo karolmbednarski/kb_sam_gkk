@@ -1,0 +1,10 @@
+function diff = moments(XX,params)
+
+%Calculates difference from a vector of predetermined moments 
+%Output:    diff: difference from the predetermined vector of moments
+%Input:     XX: vector of starting values
+%           params: structure of parameters
+
+%Created by Peter Karadi
+%June 2010
+

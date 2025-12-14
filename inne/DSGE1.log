@@ -1,0 +1,37 @@
+Starting Dynare (version 6.5).
+Calling Dynare with arguments: none
+Starting preprocessing of the model file ... 
+ERROR: DSGE1.mod: line 58, cols 5-6: Unknown symbol: nu 
+ERROR: DSGE1.mod: line 58, cols 20-24: Unknown symbol: theta 
+ERROR: DSGE1.mod: line 58, cols 92-96: Unknown symbol: theta 
+ERROR: DSGE1.mod: line 58, cols 102-106: Unknown symbol: x 
+ERROR: DSGE1.mod: line 58, cols 113-118: Unknown symbol: nu 
+ERROR: DSGE1.mod: line 61, cols 5-7: Unknown symbol: eta 
+ERROR: DSGE1.mod: line 61, cols 20-24: Unknown symbol: theta 
+ERROR: DSGE1.mod: line 61, cols 49-53: Unknown symbol: theta 
+ERROR: DSGE1.mod: line 61, cols 59-63: Unknown symbol: z 
+ERROR: DSGE1.mod: line 61, cols 70-76: Unknown symbol: eta 
+ERROR: DSGE1.mod: line 64, cols 5-7: Unknown symbol: phi 
+ERROR: DSGE1.mod: line 64, cols 21-23: Unknown symbol: eta 
+ERROR: DSGE1.mod: line 64, cols 27-32: Unknown symbol: lambda 
+ERROR: DSGE1.mod: line 64, cols 38-39: Unknown symbol: nu 
+ERROR: DSGE1.mod: line 67, col 5: Unknown symbol: z 
+ERROR: DSGE1.mod: line 67, cols 42-48: Unknown symbol: phi 
+ERROR: DSGE1.mod: line 70, col 5: Unknown symbol: x 
+ERROR: DSGE1.mod: line 70, cols 22-24: Unknown symbol: phi 
+ERROR: DSGE1.mod: line 70, cols 31-37: Unknown symbol: phi 
+ERROR: DSGE1.mod: line 70, col 45: Unknown symbol: z 
+ERROR: DSGE1.mod: line 74, cols 27-29: Unknown symbol: phi 
+ERROR: DSGE1.mod: line 74, col 36: Unknown symbol: N 
+ERROR: DSGE1.mod: line 77, col 5: Unknown symbol: N 
+ERROR: DSGE1.mod: line 77, cols 21-22: Unknown symbol: Ne 
+ERROR: DSGE1.mod: line 77, cols 29-30: Unknown symbol: Nn 
+ERROR: DSGE1.mod: line 80, cols 5-6: Unknown symbol: Ne 
+ERROR: DSGE1.mod: line 80, cols 17-21: Unknown symbol: theta 
+ERROR: DSGE1.mod: line 80, col 27: Unknown symbol: z 
+ERROR: DSGE1.mod: line 80, cols 34-38: Unknown symbol: N 
+ERROR: DSGE1.mod: line 80, cols 46-49: Unknown symbol: e_Ne 
+ERROR: DSGE1.mod: line 83, cols 5-6: Unknown symbol: Nn 
+ERROR: DSGE1.mod: line 83, cols 16-20: Unknown symbol: omega 
+ERROR: DSGE1.mod: line 166, cols 5-8: Unknown symbol: prem 
+Preprocessing time: 0h00m00s.

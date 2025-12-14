@@ -1,10 +1,10 @@
 clear;
 clc;
-dynare FA1;
+dynare DSGE1;
 results_cell{1} = oo_.irfs;
-dynare FA2;
+dynare DSGE2;
 results_cell{2} = oo_.irfs;
-dynare FA3;
+dynare DSGE3;
 results_cell{3} = oo_.irfs;
 
 
@@ -43,7 +43,7 @@ for k = 1:num_vars
     axis tight;
     
 
- if k == 1 || k == 10 || k == 19 || k == 28 || k == 37 || k == 46
+ if k == 1 || k == 10 || k == 19 || k == 28
        legend('i', 'ii', 'iii', 'Location', 'Best');
  end
     

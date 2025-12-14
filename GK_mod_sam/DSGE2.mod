@@ -13,7 +13,7 @@ hh=0;
 zetta=7.20000000;
 alfa=0.33000000;
 G_over_Y=0.20000000;
-eta_i=4;
+eta_i=1;
 varphi = 0.27600000;
 epsilon=4.16700000;
 gam=0;
@@ -66,7 +66,7 @@ exp(Ym)     =   exp(a)*(exp(ksi)*exp(U)*exp(K(-1)))^alfa*exp(L)^(1-alfa);
 
 //Capital Goods Producer
 //8. Optimal investment decision
-exp(Q) = 1 + eta_i * (exp(I)/exp(K(-1)) - exp(delta));
+exp(Q) = 1 + eta_i * (exp(I)/exp(K(-1)) - delta_c);
 //9. Depreciation rate
 exp(delta) = delta_c+b/(1+zetta)*exp(U)^(1+zetta);
 
@@ -84,7 +84,7 @@ exp(G)   =   G_ss*exp(g);
 
 //Equilibrium
 //14. Aggregate resource constraint
-exp(Y) = exp(C)+exp(G)+exp(I) + eta_i/2 * (exp(I)/exp(K(-1)) - exp(delta))^2 * exp(K(-1));
+exp(Y) = exp(C)+exp(G)+exp(I) + eta_i/2 * (exp(I)/exp(K(-1)) - delta_c)^2 * exp(K(-1));
 //15. Wholesale, retail output
 exp(Ym)    =   exp(Y)*exp(D);
 

@@ -1,10 +1,10 @@
 clear;
 clc;
-dynare FA1;
+dynare FA1original;
 results_cell{1} = oo_.irfs;
-dynare FA2;
+dynare FA2original;
 results_cell{2} = oo_.irfs;
-dynare FA3;
+dynare FA3original;
 results_cell{3} = oo_.irfs;
 
 

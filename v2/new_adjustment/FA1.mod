@@ -14,9 +14,9 @@ zetta=7.20000000;
 theta=0.97155955;
 alfa=0.33000000;
 G_over_Y=0.20000000;
-eta_i=1;
+eta_i=3;
 epsilon=4.16700000;
-gam=0;
+gam=0.77900000;
 gam_P=0.24100000;
 kappa_pi=1.50000000;
 kappa_y=-0.12500000;
@@ -101,7 +101,7 @@ exp(Q) = 1 + eta_i * (exp(I)/exp(K(-1)) - delta_c);
 exp(delta) = delta_c+b/(1+zetta)*exp(U)^(1+zetta);
 
 //18. Optimal capacity utilization rate
-exp(Pm)*alfa*exp(Ym)/exp(U) = b*exp(U)^zetta*exp(ksi)*exp(K(-1));
+U=log(1.00000000);
 
 //19. Net investment
 In  =   exp(I)-exp(delta)*exp(ksi)*exp(K(-1));

@@ -14,9 +14,9 @@ zetta=7.20000000;
 theta=0.97155955;
 alfa=0.33000000;
 G_over_Y=0.20000000;
-eta_i=1;
+eta_i= 1.728;
 epsilon=4.16700000;
-gam=0.77900000;
+gam=0;
 gam_P=0.24100000;
 kappa_pi=1.50000000;
 kappa_y=-0.12500000;
@@ -55,7 +55,7 @@ betta*exp(R)*exp(Lambda(+1))  =   1;
 exp(Lambda)  =   exp(varrho)/exp(varrho(-1));
 
 //4. Labor market equilibrium
-chi*exp(L)^varphi    =   exp(varrho)*exp(Pm)*(1-alfa)*exp(Y)/exp(L);
+L=log(0.33333333);
 
 //Financial Intermediaries
 //5. Value of banks' capital
@@ -95,13 +95,12 @@ exp(Ym)     =   exp(a)*(exp(ksi)*exp(U)*exp(K(-1)))^alfa*exp(L)^(1-alfa);
 
 //Capital Goods Producer
 //16. Optimal investment decision
-exp(Q) = 1 + eta_i * (exp(I)/exp(K(-1)) - delta_c);
-
+exp(Q)  =   1+eta_i/2*((In+I_ss)/(In(-1)+I_ss)-1)^2+eta_i*((In+I_ss)/(In(-1)+I_ss)-1)*(In+I_ss)/(In(-1)+I_ss)-betta*exp(Lambda(+1))*eta_i*((In(+1)+I_ss)/(In+I_ss)-1)*((In(+1)+I_ss)/(In+I_ss))^2;
 //17. Depreciation rate
 exp(delta) = delta_c+b/(1+zetta)*exp(U)^(1+zetta);
 
 //18. Optimal capacity utilization rate
-exp(Pm)*alfa*exp(Ym)/exp(U) = b*exp(U)^zetta*exp(ksi)*exp(K(-1));
+U=log(1.00000000);
 
 //19. Net investment
 In  =   exp(I)-exp(delta)*exp(ksi)*exp(K(-1));
@@ -114,7 +113,7 @@ exp(G)   =   G_ss*exp(g);
 
 //Equilibrium
 //22. Aggregate resource constraint
-exp(Y) = exp(C)+exp(G)+exp(I) + eta_i/2 * (exp(I)/exp(K(-1)) - delta_c)^2 * exp(K(-1));
+exp(Y)   =   exp(C)+exp(G)+exp(I)+eta_i/2*((In+I_ss)/(In(-1)+I_ss)-1)^2*(In+I_ss);
 
 //23. Wholesale, retail output
 exp(Ym)    =   exp(Y)*exp(D);

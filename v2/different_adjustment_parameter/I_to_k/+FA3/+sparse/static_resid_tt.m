@@ -1,0 +1,37 @@
+function [T_order, T] = static_resid_tt(y, x, params, T_order, T)
+if T_order >= 0
+    return
+end
+T_order = 0;
+if size(T, 1) < 28
+    T = [T; NaN(28 - size(T, 1), 1)];
+end
+T(1) = (exp(y(7))-exp(y(7))*params(3))^(-params(2));
+T(2) = exp(y(11))*params(1)*(1-params(6))*(exp(y(12))-exp(y(13)))+exp(y(17))*params(6)*params(1)*exp(y(11))*exp(y(21));
+T(3) = exp(y(22))*params(7)*exp(y(2))/exp(y(3))+exp(y(36))*(exp(y(9))-exp(y(32)));
+T(4) = exp(y(5))^(1-params(7));
+T(5) = exp(y(3))*exp(y(36));
+T(6) = exp(y(35))*T(5)^params(7);
+T(7) = exp(y(6))/exp(y(3));
+T(8) = T(7)-params(32);
+T(9) = exp(y(3))*params(9)/2*T(8)^2;
+T(10) = exp(y(38));
+T(11) = exp(y(27))*params(11)*T(10)^((-params(12))*params(10));
+T(12) = T(10)^params(10);
+T(13) = T(11)*T(12);
+T(14) = params(11)*T(10)^(params(12)*(1-params(11)));
+T(15) = T(10)^(params(11)-1);
+T(16) = T(10)^(params(12)*(-params(10)));
+T(17) = exp(y(28))*T(12)*exp(y(11))*params(1)*params(11)*T(16);
+T(18) = exp(y(11))*params(1)*params(11)*T(10)^(params(10)-1);
+T(19) = T(10)^(params(12)*(1-params(10)));
+T(20) = exp(y(29))*T(18)*T(19);
+T(21) = T(10)*exp(y(28))*params(10)/(params(10)-1)/exp(y(29));
+T(22) = exp(y(30))^params(15);
+T(23) = 1/params(1)*T(10)^params(13);
+T(24) = exp(y(26))/(params(10)/(params(10)-1));
+T(25) = T(24)^params(14);
+T(26) = T(23)*T(25);
+T(27) = T(26)^(1-params(15));
+T(28) = exp(y(22))*params(7)*exp(y(1))/T(5);
+end

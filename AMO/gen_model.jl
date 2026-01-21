@@ -1,298 +1,415 @@
-# ==============================================================================
-#  Julia Script: Fully Parameterized Liquidity Model Generator
-#  Method: Standard Linearization
-# ==============================================================================
 
-# --- 1. USER CONFIGURATION (CONTROL PANEL) ------------------------------------
-
-const MOD_FILENAME = "AMO_model.mod"
+# Output filename for the generated Dynare model
+MOD_FILENAME = "AMO_model.mod"
 
 # ==============================================================================
-#  A. MODEL STRUCTURE
+#  SECTION 1: MODEL CONFIGURATION
+#  
+#  This section contains all user-configurable parameters. Modify these
+#  values to change the model structure and calibration.
 # ==============================================================================
-# Define the number of assets in each group (cluster)
-# Example: [3, 2, 2] means 3 assets in Group 1, 2 in Group 2, 2 in Group 3
-const ASSETS_PER_GROUP = [3, 2, 2]
 
-# ==============================================================================
-#  B. PREFERENCE & ENDOWMENT PARAMETERS
-# ==============================================================================
-const GLOBAL_PARAMS = Dict(
-    # --- Consumer Preferences ---
-    "beta"   => 0.99,   # Discount factor (time preference)
-    "sigma"  => 2.0,    # Risk aversion coefficient (curvature of consumption utility)
-    "gamma"  => 2.0,    # Curvature parameter for liquidity utility function
-    
-    # --- Liquidity Parameters ---
-    "psi"    => 0.5,    # Weight on liquidity in utility (relative to consumption)
-    "eta"    => 1.5,    # Elasticity of substitution across asset groups
-    
-    # --- Endowment ---
-    "y"      => 1.0,    # Steady-state consumption endowment
-    
-    # --- Shock Process Parameters ---
-    "rho_G"  => 0.9,    # Persistence of supply shocks (omega_G)
-    "sig_G"  => 0.01,   # Std dev of supply shock innovations
-    "rho_a"  => 0.9,    # Persistence of preference shocks (omega_a)
-    "sig_a"  => 0.01    # Std dev of preference shock innovations
+# -----------------------------------------------------------------------------
+# 1.1 MARKET STRUCTURE: Basket-Asset Mapping Matrix
+# -----------------------------------------------------------------------------
+# Description:
+#   Defines which assets belong to which liquidity baskets.
+#   - Rows = Liquidity Baskets (markets/sectors)
+#   - Columns = Individual Assets
+#   - Entry = 1 if asset belongs to basket, 0 otherwise
+
+
+MARKET_MAP = [
+    1 1 1 0 0 ;  
+    0 0 1 1 1    
+]
+
+# -----------------------------------------------------------------------------
+# 1.2 HOUSEHOLD PREFERENCES: Global Parameters
+# -----------------------------------------------------------------------------
+
+GLOBAL_PARAMS = Dict(
+    "beta"  => 0.99,    # Quarterly discount factor
+    "sigma" => 2.0,     # CRRA coefficient
+    "psi"   => 0.5,     # Liquidity preference weight
+    "gamma" => 2.0,     # Inter-basket complementarity
+    "eta"   => 1.5,     # Cross-basket substitution elasticity
+    "y"     => 1.0,     # Normalized endowment
+    "rho_G" => 0.9,     # Supply shock persistence
+    "sig_G" => 0.01,    # Supply shock volatility
+    "rho_a" => 0.9,     # Preference shock persistence
+    "sig_a" => 0.01     # Preference shock volatility
 )
 
-# ==============================================================================
-#  C. GROUP-LEVEL PARAMETERS
-# ==============================================================================
-# Each vector must have length equal to length(ASSETS_PER_GROUP)
+# -----------------------------------------------------------------------------
+# 1.3 BASKET-LEVEL PARAMETERS
+# -----------------------------------------------------------------------------
 
+BASKET_RHO     = [10.0, 2.0]   # Elasticity of substitution WITHIN each basket
+BASKET_DELTA   = [0.2, 0.8]    # Sensitivity to basket-level preference shocks
+BASKET_WEIGHTS = [0.5, 0.5]    # Relative importance of each basket in utility
 
+# -----------------------------------------------------------------------------
+# 1.4 ASSET-LEVEL PARAMETERS
+# -----------------------------------------------------------------------------
 
-const GROUP_RHO = [10.0, 2.0, 4.0]
-
-# Sensitivity of preferences to idiosyncratic group shocks
-# Higher values = stronger preference response to omega_a_group_k
-const GROUP_DELTA = [0.2, 0.8, 0.5]
-
-# Steady-state importance weights for each group (raw, will be normalized)
-# These determine the relative size/importance of each group in steady state
-const GROUP_WEIGHTS_RAW = [0.7, 0.3, 0.4]
-
-# ==============================================================================
-#  D. ASSET-LEVEL PARAMETERS
-# ==============================================================================
-# Each element is a vector matching the group size in ASSETS_PER_GROUP
-# Asset numbering: Group 1 assets 1-3, Group 2 assets 4-5, Group 3 assets 6-7
-
-# Steady-state supply (b_bar_i)
-# Initial quantity of each asset in the portfolio
-const ASSET_SUPPLY = [
-    [2.0, 2.0, 2.0],  # Group 1
-    [0.5, 0.5],       # Group 2
-    [1.0, 1.0]        # Group 3
-]
-
-# Supply elasticity to shocks (phi_i)
-
-const ASSET_PHI = [
-    [0.1, 0.3, 0.2],  # Group 1
-    [1.0, 1.5],       # Group 2
-    [0.7, 0.5]        # Group 3
-]
-
-# Preference shock sensitivity (delta_ik)
-
-const ASSET_DELTA = [
-    [0.2, 0.3, 0.1],  # Group 1
-    [0.9, 0.9],       # Group 2
-    [0.6, 0.4]        # Group 3
-]
-
-# Steady-state weights WITHIN each group (raw, will be normalized)
-
-const ASSET_WEIGHTS_RAW = [
-    [1.0, 1.2, 1.7],  # Group 1
-    [3.0, 2.0],       # Group 2
-    [0.5, 1.6]        # Group 3
-]
+ASSET_SUPPLY_BAR = [2.0, 2.0, 1.0, 0.5, 0.5]   # Steady-state supply of each asset
+ASSET_PHI        = [0.1, 0.1, 0.2, 1.5, 1.5]   # Supply elasticity to aggregate shock
+ASSET_DELTA_IDIO = [0.1, 0.1, 0.5, 0.9, 0.9]   # Sensitivity to asset-specific preference shocks
 
 
 # ==============================================================================
-#  LOGIC (DO NOT EDIT BELOW THIS LINE)
+#  SECTION 2: MODEL GENERATION ENGINE
+#  
+#  DO NOT MODIFY BELOW THIS LINE UNLESS YOU UNDERSTAND THE MODEL STRUCTURE
+#  
+#  This section automatically generates the Dynare model file based on the
+#  configuration above. The generation process:
+#    1. Validates configuration
+#    2. Declares variables and parameters
+#    3. Constructs model equations
+#    4. Sets initial values
+#    5. Configures solution and simulation
 # ==============================================================================
 
-# --- Derived Constants ---
-const N_GROUPS = length(ASSETS_PER_GROUP)
-const TOTAL_ASSETS = sum(ASSETS_PER_GROUP)
+# Extract dimensions from configuration
+N_BASKETS, N_ASSETS = size(MARKET_MAP)
+BASKET_ALPHA_BAR = BASKET_WEIGHTS ./ sum(BASKET_WEIGHTS)
 
-# --- Helper Functions ---
-function get_group_range(k)
-    start_idx = sum(ASSETS_PER_GROUP[1:k-1]) + 1
-    end_idx   = start_idx + ASSETS_PER_GROUP[k] - 1
-    return start_idx:end_idx
-end
-
-function get_asset_group(flat_index)
-    current_count = 0
-    for k in 1:N_GROUPS
-        if flat_index <= current_count + ASSETS_PER_GROUP[k]; return k; end
-        current_count += ASSETS_PER_GROUP[k]
-    end
-    error("Index error")
-end
-
-function get_local_index(flat_index)
-    k = get_asset_group(flat_index)
-    return flat_index - (sum(ASSETS_PER_GROUP[1:k-1]))
-end
-
-function build_summation(indices, term_generator)
-    terms = String[]
-    for i in indices; push!(terms, term_generator(i)); end
-    return join(terms, " + ")
-end
-
-# --- Normalization ---
-const GROUP_ALPHA_BAR = GROUP_WEIGHTS_RAW ./ sum(GROUP_WEIGHTS_RAW)
-const ASSET_ALPHA_BAR = [ w ./ sum(w) for w in ASSET_WEIGHTS_RAW ]
-
-# --- Generation ---
-
+# Begin model file generation
 open(MOD_FILENAME, "w") do io
-    println("Generating $MOD_FILENAME (No Yield Variable)...")
+    println("=" ^ 70)
+    println("Generating Dynare Model: $MOD_FILENAME")
+    println("Configuration:")
+    println("  • Number of Baskets: $N_BASKETS")
+    println("  • Number of Assets:  $N_ASSETS")
+    println("  • Overlapping Assets: $(sum(sum(MARKET_MAP, dims=1) .> 1))")
+    println("=" ^ 70)
 
-    # A. PREAMBLE
-    write(io, "// Generated by Julia - Standard Linearization\n")
-    write(io, "var L c\n")
+    # -------------------------------------------------------------------------
+    # DYNARE HEADER
+    # -------------------------------------------------------------------------
+    write(io, "// ============================================================================\n")
+    write(io, "// Overlapping Liquidity Baskets Model (AMO)\n")
+    write(io, "// Generated automatically by gen_model.jl\n")
+    write(io, "// DO NOT EDIT THIS FILE DIRECTLY - Modify gen_model.jl instead\n")
+    write(io, "// ============================================================================\n\n")
+
+    # -------------------------------------------------------------------------
+    # VARIABLE DECLARATIONS
+    # -------------------------------------------------------------------------
+    write(io, "// --- ENDOGENOUS VARIABLES ---\n")
+    write(io, "var\n")
+    write(io, "    L                      // Aggregate liquidity index\n")
+    write(io, "    c                      // Consumption\n")
     
-    for i in 1:TOTAL_ASSETS; write(io, "    omega_G_$i omega_a_$i\n"); end
-    for k in 1:N_GROUPS; write(io, "    L_k$k alpha_k$k omega_a_group_$k\n"); end
+    # Shock processes
+    for i in 1:N_ASSETS
+        write(io, "    omega_G_$i             // Supply shock for asset $i\n")
+        write(io, "    omega_a_$i             // Asset-specific preference shock $i\n")
+    end
     
-    # CHANGED: Removed Yield_$i
-    for k in 1:N_GROUPS
-        indices = get_group_range(k)
-        for local_j in 1:length(indices)
-            write(io, "    b_$(indices[local_j]) R_$(k)_$local_j alpha_ik_$(indices[local_j])\n")
+    # Basket-level variables
+    for k in 1:N_BASKETS
+        write(io, "    L_k$k                  // Liquidity index for basket $k\n")
+        write(io, "    alpha_k$k              // Time-varying weight on basket $k\n")
+        write(io, "    omega_a_basket_$k      // Basket-level preference shock $k\n")
+    end
+
+    # Asset returns
+    write(io, "\n    // Asset Returns (Gross)\n")
+    for i in 1:N_ASSETS
+        write(io, "    R_$i                   // Gross return on asset $i\n")
+    end
+
+    # Asset allocations by basket
+    write(io, "\n    // Asset Holdings by Basket: b_i_k = holdings of asset i in basket k\n")
+    for k in 1:N_BASKETS
+        for i in 1:N_ASSETS
+            if MARKET_MAP[k,i] == 1
+                write(io, "    b_$(i)_k$(k)           // Asset $i in basket $k\n")
+                write(io, "    alpha_$(i)_k$(k)       // Weight on asset $i in basket $k\n")
+            end
         end
     end
     write(io, ";\n\n")
 
+    # -------------------------------------------------------------------------
+    # SHOCK DECLARATIONS
+    # -------------------------------------------------------------------------
+    write(io, "// --- EXOGENOUS SHOCKS (Innovations) ---\n")
     write(io, "varexo\n")
-    for i in 1:TOTAL_ASSETS; write(io, "    eps_G_$i eps_a_$i\n"); end
-    for k in 1:N_GROUPS; write(io, "    eps_a_group_$k\n"); end
+    for i in 1:N_ASSETS
+        write(io, "    eps_G_$i               // Supply shock innovation, asset $i\n")
+        write(io, "    eps_a_$i               // Preference shock innovation, asset $i\n")
+    end
+    for k in 1:N_BASKETS
+        write(io, "    eps_a_basket_$k        // Basket preference shock innovation $k\n")
+    end
     write(io, ";\n\n")
 
-    # B. PARAMETERS
+    # -------------------------------------------------------------------------
+    # PARAMETER DECLARATIONS
+    # -------------------------------------------------------------------------
+    write(io, "// --- PARAMETERS ---\n")
     write(io, "parameters\n")
-    for (k,v) in GLOBAL_PARAMS; write(io, "    $k\n"); end
-    for k in 1:N_GROUPS; write(io, "    rho_k$k alpha_bar_k$k delta_k$k\n"); end
-    for i in 1:TOTAL_ASSETS; write(io, "    alpha_bar_ik_$i delta_ik_$i b_bar_$i phi_$i\n"); end
+    
+    write(io, "    // Global preferences and shocks\n")
+    for (key,val) in GLOBAL_PARAMS
+        write(io, "    $key\n")
+    end
+    
+    write(io, "\n    // Basket-level parameters\n")
+    for k in 1:N_BASKETS
+        write(io, "    rho_k$k                // Intra-basket substitution elasticity\n")
+        write(io, "    alpha_bar_k$k          // Steady-state basket weight\n")
+        write(io, "    delta_k$k              // Basket shock sensitivity\n")
+    end
+    
+    write(io, "\n    // Asset-level parameters\n")
+    for i in 1:N_ASSETS
+        write(io, "    b_bar_$i               // Steady-state supply\n")
+        write(io, "    phi_$i                 // Supply elasticity\n")
+        write(io, "    delta_idio_$i          // Idiosyncratic shock sensitivity\n")
+    end
+    
+    write(io, "\n    // Intra-basket asset weights\n")
+    for k in 1:N_BASKETS
+        for i in 1:N_ASSETS
+            if MARKET_MAP[k,i] == 1
+                write(io, "    alpha_bar_$(i)_k$(k)   // SS weight: asset $i in basket $k\n")
+            end
+        end
+    end
     write(io, ";\n\n")
 
-    # C. PARAMETERS ASSIGNMENT
-    write(io, "// --- CALIBRATION ---\n")
-    for (k,v) in GLOBAL_PARAMS; write(io, "$k = $v;\n"); end
-    write(io, "\n")
+    # -------------------------------------------------------------------------
+    # CALIBRATION
+    # -------------------------------------------------------------------------
+    write(io, "// ============================================================================\n")
+    write(io, "// CALIBRATION: Parameter Values\n")
+    write(io, "// ============================================================================\n\n")
     
-    for k in 1:N_GROUPS
-        write(io, "rho_k$k = $(GROUP_RHO[k]); alpha_bar_k$k = $(GROUP_ALPHA_BAR[k]); delta_k$k = $(GROUP_DELTA[k]);\n")
+    write(io, "// Global Parameters\n")
+    for (key,val) in GLOBAL_PARAMS
+        write(io, "$key = $val;\n")
     end
     write(io, "\n")
 
-    for k in 1:N_GROUPS
-        indices = get_group_range(k)
-        for i in indices
-            local_i = get_local_index(i)
-            write(io, "alpha_bar_ik_$i = $(ASSET_ALPHA_BAR[k][local_i]); delta_ik_$i = $(ASSET_DELTA[k][local_i]);\n")
-            write(io, "b_bar_$i = $(ASSET_SUPPLY[k][local_i]); phi_$i = $(ASSET_PHI[k][local_i]);\n")
+    write(io, "// Basket Parameters\n")
+    for k in 1:N_BASKETS
+        write(io, "rho_k$k = $(BASKET_RHO[k]);           // Basket $k substitution elasticity\n")
+        write(io, "alpha_bar_k$k = $(BASKET_ALPHA_BAR[k]);     // Basket $k steady-state weight\n")
+        write(io, "delta_k$k = $(BASKET_DELTA[k]);         // Basket $k shock sensitivity\n")
+    end
+    write(io, "\n")
+
+    write(io, "// Asset Parameters\n")
+    for i in 1:N_ASSETS
+        write(io, "b_bar_$i = $(ASSET_SUPPLY_BAR[i]);          // Asset $i supply\n")
+        write(io, "phi_$i = $(ASSET_PHI[i]);              // Asset $i supply elasticity\n")
+        write(io, "delta_idio_$i = $(ASSET_DELTA_IDIO[i]);      // Asset $i shock sensitivity\n")
+    end
+    write(io, "\n")
+
+    write(io, "// Intra-Basket Asset Weights (Equal within basket)\n")
+    for k in 1:N_BASKETS
+        n_assets_in_basket = sum(MARKET_MAP[k,:])
+        weight_val = 1.0 / n_assets_in_basket
+        for i in 1:N_ASSETS
+            if MARKET_MAP[k,i] == 1
+                write(io, "alpha_bar_$(i)_k$(k) = $weight_val;    // Asset $i in basket $k\n")
+            end
         end
     end
     write(io, "\n")
 
-    # D. MODEL BLOCK
+    # -------------------------------------------------------------------------
+    # MODEL BLOCK
+    # -------------------------------------------------------------------------
     write(io, "model;\n")
     write(io, "    c = y;\n\n")
 
-    # 1. Shocks
-    for i in 1:TOTAL_ASSETS
+    # 1. Shock Processes
+    for i in 1:N_ASSETS
         write(io, "    omega_G_$i = rho_G * omega_G_$i(-1) + sig_G * eps_G_$i;\n")
         write(io, "    omega_a_$i = rho_a * omega_a_$i(-1) + sig_a * eps_a_$i;\n")
     end
-    for k in 1:N_GROUPS
-        write(io, "    omega_a_group_$k = rho_a * omega_a_group_$k(-1) + sig_a * eps_a_group_$k;\n")
+    for k in 1:N_BASKETS
+        write(io, "    omega_a_basket_$k = rho_a * omega_a_basket_$k(-1) + sig_a * eps_a_basket_$k;\n")
     end
     write(io, "\n")
 
     # 2. Aggregators
-    sum_L = build_summation(1:N_GROUPS, k -> "(alpha_k$k * L_k$k^((eta-1)/eta))")
-    write(io, "    L = ( $sum_L )^(eta/(eta-1));\n")
+    terms_L = ["(alpha_k$k * L_k$k^((eta-1)/eta))" for k in 1:N_BASKETS]
+    write(io, "    L = ( " * join(terms_L, " + ") * " )^(eta/(eta-1));\n\n")
 
-    for k in 1:N_GROUPS
-        indices = get_group_range(k)
-        sum_Lk = build_summation(indices, i -> "(alpha_ik_$i * b_$i^((rho_k$k-1)/rho_k$k))")
-        write(io, "    L_k$k = ( $sum_Lk )^(rho_k$k/(rho_k$k-1));\n")
+    for k in 1:N_BASKETS
+        terms_Lk = []
+        for i in 1:N_ASSETS
+            if MARKET_MAP[k,i] == 1
+                push!(terms_Lk, "(alpha_$(i)_k$(k) * b_$(i)_k$(k)^((rho_k$k-1)/rho_k$k))")
+            end
+        end
+        write(io, "    L_k$k = ( " * join(terms_Lk, " + ") * " )^(rho_k$k/(rho_k$k-1));\n")
     end
+    write(io, "\n")
+
+    # 3. Weights (Shock Dependent)
+    denom_k_terms = ["(alpha_bar_k$j * exp(delta_k$j * omega_a_basket_$j))" for j in 1:N_BASKETS]
+    denom_k_str = join(denom_k_terms, " + ")
     
-    # 3. Weights
-    denom_k = build_summation(1:N_GROUPS, j -> "(alpha_bar_k$j * exp(delta_k$j * omega_a_group_$j))")
-    for k in 1:N_GROUPS
-        num_k = "(alpha_bar_k$k * exp(delta_k$k * omega_a_group_$k))"
-        write(io, "    alpha_k$k = $num_k / ( $denom_k );\n")
+    for k in 1:N_BASKETS
+        write(io, "    alpha_k$k = (alpha_bar_k$k * exp(delta_k$k * omega_a_basket_$k)) / ($denom_k_str);\n")
     end
 
-    for k in 1:N_GROUPS
-        indices = get_group_range(k)
-        denom_ik = build_summation(indices, j -> "(alpha_bar_ik_$j * exp(delta_ik_$j * omega_a_$j))")
-        for i in indices
-            num_ik = "(alpha_bar_ik_$i * exp(delta_ik_$i * omega_a_$i))"
-            write(io, "    alpha_ik_$i = $num_ik / ( $denom_ik );\n")
+    for k in 1:N_BASKETS
+        denom_ik_terms = []
+        for j in 1:N_ASSETS
+            if MARKET_MAP[k,j] == 1
+                push!(denom_ik_terms, "(alpha_bar_$(j)_k$(k) * exp(delta_idio_$j * omega_a_$j))")
+            end
+        end
+        denom_ik_str = join(denom_ik_terms, " + ")
+        
+        for i in 1:N_ASSETS
+            if MARKET_MAP[k,i] == 1
+                num_ik = "(alpha_bar_$(i)_k$(k) * exp(delta_idio_$i * omega_a_$i))"
+                write(io, "    alpha_$(i)_k$(k) = $num_ik / ($denom_ik_str);\n")
+            end
         end
     end
     write(io, "\n")
 
-    # 4. FOCs & Supply
-    for k in 1:N_GROUPS
-        indices = get_group_range(k)
-        for local_j in 1:length(indices)
-            i = indices[local_j]
-        
-            write(io, "    b_$i = b_bar_$i + phi_$i * omega_G_$i;\n")
-        
-            lhs = "1 - beta * R_$(k)_$local_j"
-        
-        weights = "alpha_k$k * alpha_ik_$i"
-        agg_L   = "L^(1/eta - gamma)"
-        agg_Lk  = "L_k$k^(1/rho_k$k - 1/eta)"
-        own_b   = "b_$i^(-1/rho_k$k)"
-        rhs = "(psi / c^(-sigma)) * $weights * $agg_L * $agg_Lk * $own_b"
-        
-            write(io, "    $lhs = $rhs;\n")
+    # 4. MARKET CLEARING
+    for i in 1:N_ASSETS
+        lhs_supply = "b_bar_$i + phi_$i * omega_G_$i"
+        demand_terms = []
+        for k in 1:N_BASKETS
+            if MARKET_MAP[k,i] == 1
+                push!(demand_terms, "b_$(i)_k$(k)")
+            end
+        end
+        rhs_demand = join(demand_terms, " + ")
+        write(io, "    $lhs_supply = $rhs_demand;\n")
+    end
+    write(io, "\n")
+
+    # 5. PRICING (FOCs)
+    for k in 1:N_BASKETS
+        for i in 1:N_ASSETS
+            if MARKET_MAP[k,i] == 1
+                lhs = "1 - beta * R_$i"
+                weights = "alpha_k$k * alpha_$(i)_k$(k)"
+                agg_L   = "L^(1/eta - gamma)"
+                agg_Lk  = "L_k$k^(1/rho_k$k - 1/eta)"
+                own_b   = "b_$(i)_k$(k)^(-1/rho_k$k)"
+                rhs = "(psi / c^(-sigma)) * $weights * $agg_L * $agg_Lk * $own_b"
+                write(io, "    $lhs = $rhs;\n")
+            end
         end
     end
     write(io, "end;\n\n")
 
-    # E. INITIALIZATION
+    # -------------------------------------------------------------------------
+    # STEADY STATE INITIALIZATION
+    # -------------------------------------------------------------------------
+    write(io, "// ============================================================================\n")
+    write(io, "// INITIAL/STEADY STATE VALUES\n")
+    write(io, "// ============================================================================\n\n")
+    
     write(io, "initval;\n")
-    write(io, "    c = y; L = 1.0;\n")
-    for i in 1:TOTAL_ASSETS; write(io, "    omega_G_$i = 0; omega_a_$i = 0;\n"); end
-    for k in 1:N_GROUPS; write(io, "    omega_a_group_$k = 0;\n"); end
+    write(io, "    // Consumption and aggregate liquidity\n")
+    write(io, "    c = y;\n")
+    write(io, "    L = 1.0;\n\n")
     
-    for k in 1:N_GROUPS
-        write(io, "    L_k$k = 1.0; alpha_k$k = $(GROUP_ALPHA_BAR[k]);\n")
+    write(io, "    // Shocks initialized at zero (steady state)\n")
+    for i in 1:N_ASSETS
+        write(io, "    omega_G_$i = 0;\n")
+        write(io, "    omega_a_$i = 0;\n")
     end
+    for k in 1:N_BASKETS
+        write(io, "    omega_a_basket_$k = 0;\n")
+    end
+    write(io, "\n")
     
-    for k in 1:N_GROUPS
-        indices = get_group_range(k)
-        for local_j in 1:length(indices)
-            i = indices[local_j]
-            local_i = get_local_index(i)
-            write(io, "    b_$i = $(ASSET_SUPPLY[k][local_i]);\n")
-            write(io, "    alpha_ik_$i = $(ASSET_ALPHA_BAR[k][local_i]);\n")
-            # CHANGED: Initialize R directly with R_k_j notation
-            write(io, "    R_$(k)_$local_j = 1.0/beta - 0.005;\n")
+    write(io, "    // Asset returns and allocations\n")
+    for i in 1:N_ASSETS
+        baskets_for_i = sum(MARKET_MAP[:,i])
+        share = ASSET_SUPPLY_BAR[i] / baskets_for_i
+        write(io, "    R_$i = 1.0/beta - 0.005;  // Slight premium over risk-free rate\n")
+        
+        for k in 1:N_BASKETS
+            if MARKET_MAP[k,i] == 1
+                write(io, "    b_$(i)_k$(k) = $share;\n")
+                n_in_basket = sum(MARKET_MAP[k,:])
+                write(io, "    alpha_$(i)_k$(k) = $(1.0/n_in_basket);\n")
+            end
         end
     end
+    write(io, "\n")
+    
+    write(io, "    // Basket aggregates\n")
+    for k in 1:N_BASKETS
+        write(io, "    L_k$k = 1.0;\n")
+        write(io, "    alpha_k$k = $(BASKET_ALPHA_BAR[k]);\n")
+    end
+
     write(io, "end;\n\n")
 
-    # F. SOLVE
+    # -------------------------------------------------------------------------
+    # SHOCK CONFIGURATION
+    # -------------------------------------------------------------------------
+    write(io, "// ============================================================================\n")
+    write(io, "// SHOCK VARIANCES\n")
+    write(io, "// ============================================================================\n\n")
+    
     write(io, "shocks;\n")
-    for i in 1:TOTAL_ASSETS; write(io, "    var eps_G_$i = 1; var eps_a_$i = 1;\n"); end
-    for k in 1:N_GROUPS; write(io, "    var eps_a_group_$k = 1;\n"); end
+    for i in 1:N_ASSETS
+        write(io, "    var eps_G_$i = 1;          // Supply shock variance\n")
+        write(io, "    var eps_a_$i = 1;          // Preference shock variance\n")
+    end
+    for k in 1:N_BASKETS
+        write(io, "    var eps_a_basket_$k = 1;   // Basket shock variance\n")
+    end
     write(io, "end;\n\n")
     
-    write(io, "steady;\ncheck;\n")
+    # -------------------------------------------------------------------------
+    # SOLUTION COMMANDS
+    # -------------------------------------------------------------------------
+    write(io, "// ============================================================================\n")
+    write(io, "// SOLUTION AND SIMULATION\n")
+    write(io, "// ============================================================================\n\n")
+    
+    write(io, "steady;  // Compute steady state\n")
+    write(io, "check;   // Check Blanchard-Kahn conditions\n\n")
+    write(io, "// First-order approximation with 20-period IRFs\n")
     write(io, "stoch_simul(order=1, irf=20, graph_format=pdf);\n")
 end
 
-println("Success! Created $MOD_FILENAME ")
+println("=" ^ 70)
+println("SUCCESS! Model file created: $MOD_FILENAME")
+println("=" ^ 70)
+println("\nNext Steps:")
+println("  1. Review the generated .mod file")
+println("  2. Run: using Dynare; context = @dynare \"$MOD_FILENAME\";")
+println("  3. Analyze IRFs and model statistics")
+println("=" ^ 70)
 
-# install dynare
+# ==============================================================================
+#  SECTION 3: EXECUTION
+#  
+#  Uncomment the lines below to automatically run Dynare after generation
+# ==============================================================================
+
+# To install Dynare (run once):
 # using Pkg
-# pkg"add Dynare"
+# Pkg.add("Dynare")
 
-
-
-# update dynare
+# To update Dynare:
 # using Pkg
-# pkg"update"
+# Pkg.update("Dynare")
 
-
-
+# Automatic execution (uncomment to enable):
 using Dynare
-context = @dynare  "AMO_model.mod";
+context = @dynare "AMO_model.mod";

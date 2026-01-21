@@ -1,0 +1,315 @@
+# ==============================================================================
+#  Julia Script: Fully Parameterized Liquidity Model Generator
+#  Method: Standard Linearization
+# ==============================================================================
+
+# --- 1. USER CONFIGURATION (CONTROL PANEL) ------------------------------------
+
+const MOD_FILENAME = "AMO_model_old.mod"
+
+# ==============================================================================
+#  A. MODEL STRUCTURE
+# ==============================================================================
+# Define the number of assets in each group (cluster)
+# Example: [3, 2, 2] means 3 assets in Group 1, 2 in Group 2, 2 in Group 3
+const ASSETS_PER_GROUP = [3, 2, 2]
+
+# ==============================================================================
+#  B. PREFERENCE & ENDOWMENT PARAMETERS
+# ==============================================================================
+const GLOBAL_PARAMS = Dict(
+    # --- Consumer Preferences ---
+    "beta"   => 0.99,   # Discount factor (time preference)
+    "sigma"  => 2.0,    # Risk aversion coefficient (curvature of consumption utility)
+    "gamma"  => 2.0,    # Curvature parameter for liquidity utility function
+    
+    # --- Liquidity Parameters ---
+    "psi"    => 0.5,    # Weight on liquidity in utility (relative to consumption)
+    "eta"    => 1.5,    # Elasticity of substitution across asset groups
+    
+    # --- Endowment ---
+    "y"      => 1.0,    # Steady-state consumption endowment
+    
+    # --- Shock Process Parameters ---
+    "rho_G"  => 0.9,    # Persistence of supply shocks (omega_G)
+    "sig_G"  => 0.01,   # Std dev of supply shock innovations
+    "rho_a"  => 0.9,    # Persistence of preference shocks (omega_a)
+    "sig_a"  => 0.01    # Std dev of preference shock innovations
+)
+
+# ==============================================================================
+#  C. GROUP-LEVEL PARAMETERS
+# ==============================================================================
+# Each vector must have length equal to length(ASSETS_PER_GROUP)
+
+
+
+const GROUP_RHO = [10.0, 2.0, 4.0]
+
+# Sensitivity of preferences to idiosyncratic group shocks
+# Higher values = stronger preference response to omega_a_group_k
+const GROUP_DELTA = [0.2, 0.8, 0.5]
+
+# Steady-state importance weights for each group (raw, will be normalized)
+# These determine the relative size/importance of each group in steady state
+const GROUP_WEIGHTS_RAW = [0.7, 0.3, 0.4]
+
+# ==============================================================================
+#  D. ASSET-LEVEL PARAMETERS
+# ==============================================================================
+# Each element is a vector matching the group size in ASSETS_PER_GROUP
+# Asset numbering: Group 1 assets 1-3, Group 2 assets 4-5, Group 3 assets 6-7
+
+# Steady-state supply (b_bar_i)
+# Initial quantity of each asset in the portfolio
+const ASSET_SUPPLY = [
+    [2.0, 2.0, 2.0],  # Group 1
+    [0.5, 0.5],       # Group 2
+    [1.0, 1.0]        # Group 3
+]
+
+# Supply elasticity to shocks (phi_i)
+
+const ASSET_PHI = [
+    [0.1, 0.3, 0.2],  # Group 1
+    [1.0, 1.5],       # Group 2
+    [0.7, 0.5]        # Group 3
+]
+
+# Preference shock sensitivity (delta_ik)
+
+const ASSET_DELTA = [
+    [0.2, 0.3, 0.1],  # Group 1
+    [0.9, 0.9],       # Group 2
+    [0.6, 0.4]        # Group 3
+]
+
+# Steady-state weights WITHIN each group (raw, will be normalized)
+
+const ASSET_WEIGHTS_RAW = [
+    [1.0, 1.2, 1.7],  # Group 1
+    [3.0, 2.0],       # Group 2
+    [0.5, 1.6]        # Group 3
+]
+
+
+# ==============================================================================
+#  LOGIC (DO NOT EDIT BELOW THIS LINE)
+# ==============================================================================
+
+# --- Derived Constants ---
+const N_GROUPS = length(ASSETS_PER_GROUP)
+const TOTAL_ASSETS = sum(ASSETS_PER_GROUP)
+
+# --- Helper Functions ---
+function get_group_range(k)
+    start_idx = sum(ASSETS_PER_GROUP[1:k-1]) + 1
+    end_idx   = start_idx + ASSETS_PER_GROUP[k] - 1
+    return start_idx:end_idx
+end
+
+function get_asset_group(flat_index)
+    current_count = 0
+    for k in 1:N_GROUPS
+        if flat_index <= current_count + ASSETS_PER_GROUP[k]; return k; end
+        current_count += ASSETS_PER_GROUP[k]
+    end
+    error("Index error")
+end
+
+function get_local_index(flat_index)
+    k = get_asset_group(flat_index)
+    return flat_index - (sum(ASSETS_PER_GROUP[1:k-1]))
+end
+
+function build_summation(indices, term_generator)
+    terms = String[]
+    for i in indices; push!(terms, term_generator(i)); end
+    return join(terms, " + ")
+end
+
+# --- Normalization ---
+const GROUP_ALPHA_BAR = GROUP_WEIGHTS_RAW ./ sum(GROUP_WEIGHTS_RAW)
+const ASSET_ALPHA_BAR = [ w ./ sum(w) for w in ASSET_WEIGHTS_RAW ]
+
+# --- Generation ---
+
+open(MOD_FILENAME, "w") do io
+    println("Generating $MOD_FILENAME (No Yield Variable)...")
+
+    # A. PREAMBLE
+    write(io, "// Generated by Julia - Standard Linearization\n")
+    write(io, "var L c\n")
+    
+    for i in 1:TOTAL_ASSETS; write(io, "    omega_G_$i omega_a_$i\n"); end
+    for k in 1:N_GROUPS; write(io, "    L_k$k alpha_k$k omega_a_group_$k\n"); end
+    
+    # CHANGED: Removed Yield_$i
+    for k in 1:N_GROUPS
+        indices = get_group_range(k)
+        for local_j in 1:length(indices)
+            write(io, "    b_$(indices[local_j]) R_$(k)_$local_j alpha_ik_$(indices[local_j])\n")
+        end
+    end
+    write(io, ";\n\n")
+
+    write(io, "varexo\n")
+    for i in 1:TOTAL_ASSETS; write(io, "    eps_G_$i eps_a_$i\n"); end
+    for k in 1:N_GROUPS; write(io, "    eps_a_group_$k\n"); end
+    write(io, ";\n\n")
+
+    # B. PARAMETERS
+    write(io, "parameters\n")
+    for (k,v) in GLOBAL_PARAMS; write(io, "    $k\n"); end
+    for k in 1:N_GROUPS; write(io, "    rho_k$k alpha_bar_k$k delta_k$k\n"); end
+    for i in 1:TOTAL_ASSETS; write(io, "    alpha_bar_ik_$i delta_ik_$i b_bar_$i phi_$i\n"); end
+    write(io, ";\n\n")
+
+    # C. PARAMETERS ASSIGNMENT
+    write(io, "// --- CALIBRATION ---\n")
+    for (k,v) in GLOBAL_PARAMS; write(io, "$k = $v;\n"); end
+    write(io, "\n")
+    
+    for k in 1:N_GROUPS
+        write(io, "rho_k$k = $(GROUP_RHO[k]); alpha_bar_k$k = $(GROUP_ALPHA_BAR[k]); delta_k$k = $(GROUP_DELTA[k]);\n")
+    end
+    write(io, "\n")
+
+    for k in 1:N_GROUPS
+        indices = get_group_range(k)
+        for i in indices
+            local_i = get_local_index(i)
+            write(io, "alpha_bar_ik_$i = $(ASSET_ALPHA_BAR[k][local_i]); delta_ik_$i = $(ASSET_DELTA[k][local_i]);\n")
+            write(io, "b_bar_$i = $(ASSET_SUPPLY[k][local_i]); phi_$i = $(ASSET_PHI[k][local_i]);\n")
+        end
+    end
+    write(io, "\n")
+
+    # D. MODEL BLOCK
+    write(io, "model;\n")
+    write(io, "    c = y;\n\n")
+
+    # 1. Shocks
+    for i in 1:TOTAL_ASSETS
+        write(io, "    omega_G_$i = rho_G * omega_G_$i(-1) + sig_G * eps_G_$i;\n")
+        write(io, "    omega_a_$i = rho_a * omega_a_$i(-1) + sig_a * eps_a_$i;\n")
+    end
+    for k in 1:N_GROUPS
+        write(io, "    omega_a_group_$k = rho_a * omega_a_group_$k(-1) + sig_a * eps_a_group_$k;\n")
+    end
+    write(io, "\n")
+
+    # 2. Aggregators
+    sum_L = build_summation(1:N_GROUPS, k -> "(alpha_k$k * L_k$k^((eta-1)/eta))")
+    write(io, "    L = ( $sum_L )^(eta/(eta-1));\n")
+
+    for k in 1:N_GROUPS
+        indices = get_group_range(k)
+        sum_Lk = build_summation(indices, i -> "(alpha_ik_$i * b_$i^((rho_k$k-1)/rho_k$k))")
+        write(io, "    L_k$k = ( $sum_Lk )^(rho_k$k/(rho_k$k-1));\n")
+    end
+    
+    # 3. Weights
+    denom_k = build_summation(1:N_GROUPS, j -> "(alpha_bar_k$j * exp(delta_k$j * omega_a_group_$j))")
+    for k in 1:N_GROUPS
+        num_k = "(alpha_bar_k$k * exp(delta_k$k * omega_a_group_$k))"
+        write(io, "    alpha_k$k = $num_k / ( $denom_k );\n")
+    end
+
+    for k in 1:N_GROUPS
+        indices = get_group_range(k)
+        denom_ik = build_summation(indices, j -> "(alpha_bar_ik_$j * exp(delta_ik_$j * omega_a_$j))")
+        for i in indices
+            num_ik = "(alpha_bar_ik_$i * exp(delta_ik_$i * omega_a_$i))"
+            write(io, "    alpha_ik_$i = $num_ik / ( $denom_ik );\n")
+        end
+    end
+    write(io, "\n")
+
+    # 4. FOCs & Supply
+    for k in 1:N_GROUPS
+        indices = get_group_range(k)
+        for local_j in 1:length(indices)
+            i = indices[local_j]
+        
+            write(io, "    b_$i = b_bar_$i + phi_$i * omega_G_$i;\n")
+        
+            lhs = "1 - beta * R_$(k)_$local_j"
+        
+            weights = "alpha_k$k * alpha_ik_$i"
+            agg_L   = "L^(1/eta - gamma)"
+            agg_Lk  = "L_k$k^(1/rho_k$k - 1/eta)"
+            own_b   = "b_$i^(-1/rho_k$k)"
+            rhs = "(psi / c^sigma) * $weights * $agg_L * $agg_Lk * $own_b"
+        
+            write(io, "    $lhs = $rhs;\n")
+        end
+    end
+    write(io, "end;\n\n")
+
+    # E. INITIALIZATION
+    write(io, "initval;\n")
+    write(io, "    c = y; L = 1.0;\n")
+    for i in 1:TOTAL_ASSETS; write(io, "    omega_G_$i = 0; omega_a_$i = 0;\n"); end
+    for k in 1:N_GROUPS; write(io, "    omega_a_group_$k = 0;\n"); end
+    
+    for k in 1:N_GROUPS
+        write(io, "    L_k$k = 1.0; alpha_k$k = $(GROUP_ALPHA_BAR[k]);\n")
+    end
+    
+    # Calculate steady-state return
+    c_ss = GLOBAL_PARAMS["y"]
+    sigma_val = GLOBAL_PARAMS["sigma"]
+    psi_val = GLOBAL_PARAMS["psi"]
+    eta_val = GLOBAL_PARAMS["eta"]
+    gamma_val = GLOBAL_PARAMS["gamma"]
+    beta_val = GLOBAL_PARAMS["beta"]
+    
+    for k in 1:N_GROUPS
+        indices = get_group_range(k)
+        rho_k_val = GROUP_RHO[k]
+        for local_j in 1:length(indices)
+            i = indices[local_j]
+            local_i = get_local_index(i)
+            b_ss = ASSET_SUPPLY[k][local_i]
+            alpha_k_ss = GROUP_ALPHA_BAR[k]
+            alpha_ik_ss = ASSET_ALPHA_BAR[k][local_i]
+            
+            # Steady state: 1 - beta*R = (psi/c^sigma) * alpha_k * alpha_ik * L^(1/eta-gamma) * L_k^(1/rho-1/eta) * b^(-1/rho)
+            # At SS: L=1, L_k=1, so RHS simplifies
+            rhs_ss = (psi_val / (c_ss^sigma_val)) * alpha_k_ss * alpha_ik_ss * (b_ss^(-1/rho_k_val))
+            R_ss = (1.0 - rhs_ss) / beta_val
+            
+            write(io, "    b_$i = $b_ss;\n")
+            write(io, "    alpha_ik_$i = $(ASSET_ALPHA_BAR[k][local_i]);\n")
+            write(io, "    R_$(k)_$local_j = $R_ss;\n")
+        end
+    end
+    write(io, "end;\n\n")
+
+    # F. SOLVE
+    write(io, "shocks;\n")
+    for i in 1:TOTAL_ASSETS; write(io, "    var eps_G_$i = 1; var eps_a_$i = 1;\n"); end
+    for k in 1:N_GROUPS; write(io, "    var eps_a_group_$k = 1;\n"); end
+    write(io, "end;\n\n")
+    
+    write(io, "steady;\ncheck;\n")
+    write(io, "stoch_simul(order=1, irf=20, graph_format=pdf);\n")
+end
+
+println("Success! Created $MOD_FILENAME ")
+
+# install dynare
+# using Pkg
+# pkg"add Dynare"
+
+
+
+# update dynare
+# using Pkg
+# pkg"update"
+
+
+
+using Dynare
+context = @dynare  "AMO_model_old.mod";

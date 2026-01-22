@@ -34,12 +34,12 @@ function SparseStaticResid!(T::Vector{<: Real}, residual::AbstractVector{<: Real
     residual[27] = (params[23]+y[7]*params[24]) - (y[28]+y[30]);
     residual[28] = (params[26]+y[9]*params[27]) - (y[32]);
     residual[29] = (params[29]+y[11]*params[30]) - (y[34]);
-    residual[30] = (1-params[10]*y[19]) - (y[25]*y[14]*params[2]/y[2]^(-params[1])*y[1]^(1/params[8]-params[6])*y[13]^(1/params[11]-1/params[8])*y[24]^((-1)/params[11]));
-    residual[31] = (1-params[10]*y[20]) - (y[13]^(1/params[11]-1/params[8])*y[1]^(1/params[8]-params[6])*y[27]*y[14]*params[2]/y[2]^(-params[1])*y[26]^((-1)/params[11]));
-    residual[32] = (1-params[10]*y[21]) - (y[13]^(1/params[11]-1/params[8])*y[1]^(1/params[8]-params[6])*y[29]*y[14]*params[2]/y[2]^(-params[1])*y[28]^((-1)/params[11]));
-    residual[33] = (1-params[10]*y[21]) - (y[1]^(1/params[8]-params[6])*y[31]*y[17]*params[2]/y[2]^(-params[1])*y[16]^(1/params[14]-1/params[8])*y[30]^((-1)/params[14]));
-    residual[34] = (1-params[10]*y[22]) - (y[16]^(1/params[14]-1/params[8])*y[1]^(1/params[8]-params[6])*y[33]*y[17]*params[2]/y[2]^(-params[1])*y[32]^((-1)/params[14]));
-    residual[35] = (1-params[10]*y[23]) - (y[16]^(1/params[14]-1/params[8])*y[1]^(1/params[8]-params[6])*y[35]*y[17]*params[2]/y[2]^(-params[1])*y[34]^((-1)/params[14]));
+    residual[30] = (1-params[10]*y[19]) - (params[2]/y[2]^(-params[1])*y[14]*y[25]*y[1]^(1/params[8]-params[6])*y[13]^(1/params[11]-1/params[8])*y[24]^((-1)/params[11]));
+    residual[31] = (1-params[10]*y[20]) - (y[13]^(1/params[11]-1/params[8])*y[1]^(1/params[8]-params[6])*params[2]/y[2]^(-params[1])*y[14]*y[27]*y[26]^((-1)/params[11]));
+    residual[32] = (1-params[10]*y[21]) - (y[13]^(1/params[11]-1/params[8])*y[1]^(1/params[8]-params[6])*params[2]/y[2]^(-params[1])*y[14]*y[29]*y[28]^((-1)/params[11]));
+    residual[33] = (1-params[10]*y[21]) - (y[1]^(1/params[8]-params[6])*params[2]/y[2]^(-params[1])*y[17]*y[31]*y[16]^(1/params[14]-1/params[8])*y[30]^((-1)/params[14]));
+    residual[34] = (1-params[10]*y[22]) - (y[16]^(1/params[14]-1/params[8])*y[1]^(1/params[8]-params[6])*params[2]/y[2]^(-params[1])*y[17]*y[33]*y[32]^((-1)/params[14]));
+    residual[35] = (1-params[10]*y[23]) - (y[16]^(1/params[14]-1/params[8])*y[1]^(1/params[8]-params[6])*params[2]/y[2]^(-params[1])*y[17]*y[35]*y[34]^((-1)/params[14]));
 end
     return nothing
 end

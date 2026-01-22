@@ -1,9 +1,9 @@
 Dynare version: 0.10.4
-2026-01-22T17:25:22.315: Starting @dynare AMO_model.mod
+2026-01-22T19:04:03.273: Starting @dynare AMO_model.mod
 ["AMO_model.mod", "language=julia", "json=compute", "notmpterms"]
 Dynare preprocessor version: 7.0.0+0
-2026-01-22T17:25:22.444: End of preprocessing
-2026-01-22T17:25:22.517: Start parse_statements!
+2026-01-22T19:04:03.339: End of preprocessing
+2026-01-22T19:04:03.366: Start parse_statements!
   Steady state
 
 ──────────────────┬──────────
@@ -245,5 +245,5 @@ Dynare preprocessor version: 7.0.0+0
        alpha_5_k2 │   0.9    0.81   0.729  0.6561  0.5905
 ──────────────────┴───────────────────────────────────────
 
-2026-01-22T17:25:33.812: End parse_statements!
-2026-01-22T17:25:33.812: End parser
+2026-01-22T19:04:07.270: End parse_statements!
+2026-01-22T19:04:07.272: End parser

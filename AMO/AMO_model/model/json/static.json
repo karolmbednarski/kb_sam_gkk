@@ -13,6 +13,7 @@
 , {"residual": {"lhs": "omega_a_5", "rhs": "rho_a*omega_a_5+sig_a*eps_a_5"}}
 , {"residual": {"lhs": "omega_a_basket_1", "rhs": "rho_a*omega_a_basket_1+sig_a*eps_a_basket_1"}}
 , {"residual": {"lhs": "omega_a_basket_2", "rhs": "rho_a*omega_a_basket_2+sig_a*eps_a_basket_2"}}
+, {"residual": {"lhs": "omega_mp_1", "rhs": "omega_mp_1*rho_mp+sig_mp*eps_mp_1"}}
 , {"residual": {"lhs": "L", "rhs": "(alpha_k1*L_k1^((eta-1)/eta)+alpha_k2*L_k2^((eta-1)/eta))^(eta/(eta-1))"}}
 , {"residual": {"lhs": "L_k1", "rhs": "(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1))^(rho_k1/(rho_k1-1))"}}
 , {"residual": {"lhs": "L_k2", "rhs": "(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2))^(rho_k2/(rho_k2-1))"}}
@@ -24,9 +25,9 @@
 , {"residual": {"lhs": "alpha_3_k2", "rhs": "exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2/(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))"}}
 , {"residual": {"lhs": "alpha_4_k2", "rhs": "alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)/(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))"}}
 , {"residual": {"lhs": "alpha_5_k2", "rhs": "alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)/(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))"}}
-, {"residual": {"lhs": "b_bar_1+omega_G_1*phi_1", "rhs": "b_1_k1"}}
+, {"residual": {"lhs": "omega_mp_1+b_bar_1+omega_G_1*phi_1", "rhs": "b_1_k1"}}
 , {"residual": {"lhs": "b_bar_2+omega_G_2*phi_2", "rhs": "b_2_k1"}}
-, {"residual": {"lhs": "b_bar_3+omega_G_3*phi_3", "rhs": "b_3_k1+b_3_k2"}}
+, {"residual": {"lhs": "b_bar_3+omega_G_3*phi_3-omega_mp_1", "rhs": "b_3_k1+b_3_k2"}}
 , {"residual": {"lhs": "b_bar_4+omega_G_4*phi_4", "rhs": "b_4_k2"}}
 , {"residual": {"lhs": "b_bar_5+omega_G_5*phi_5", "rhs": "b_5_k2"}}
 , {"residual": {"lhs": "1-beta*R_1", "rhs": "psi/c^(-sigma)*alpha_k1*alpha_1_k1*L^(1/eta-gamma)*L_k1^(1/rho_k1-1/eta)*b_1_k1^((-1)/rho_k1)"}}
@@ -37,7 +38,7 @@
 , {"residual": {"lhs": "1-beta*R_5", "rhs": "L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_5_k2*b_5_k2^((-1)/rho_k2)"}}
 
 ]
-, "external_functions_temporary_terms_jacobian": [], "temporary_terms_jacobian": [], "jacobian": {  "nrows": 35, "ncols": 35, "entries": [{"eq": 1, "col": 2, "var": "c", "val": "1"}
+, "external_functions_temporary_terms_jacobian": [], "temporary_terms_jacobian": [], "jacobian": {  "nrows": 36, "ncols": 36, "entries": [{"eq": 1, "col": 2, "var": "c", "val": "1"}
 , {"eq": 2, "col": 3, "var": "omega_G_1", "val": "1-rho_G"}
 , {"eq": 3, "col": 4, "var": "omega_a_1", "val": "1-rho_a"}
 , {"eq": 4, "col": 5, "var": "omega_G_2", "val": "1-rho_G"}
@@ -48,108 +49,111 @@
 , {"eq": 9, "col": 10, "var": "omega_a_4", "val": "1-rho_a"}
 , {"eq": 10, "col": 11, "var": "omega_G_5", "val": "1-rho_G"}
 , {"eq": 11, "col": 12, "var": "omega_a_5", "val": "1-rho_a"}
-, {"eq": 12, "col": 15, "var": "omega_a_basket_1", "val": "1-rho_a"}
-, {"eq": 13, "col": 18, "var": "omega_a_basket_2", "val": "1-rho_a"}
-, {"eq": 14, "col": 1, "var": "L", "val": "1"}
-, {"eq": 14, "col": 13, "var": "L_k1", "val": "(-(alpha_k1*get_power_deriv(L_k1,(eta-1)/eta,1)*get_power_deriv(alpha_k1*L_k1^((eta-1)/eta)+alpha_k2*L_k2^((eta-1)/eta),eta/(eta-1),1)))"}
-, {"eq": 14, "col": 14, "var": "alpha_k1", "val": "(-(L_k1^((eta-1)/eta)*get_power_deriv(alpha_k1*L_k1^((eta-1)/eta)+alpha_k2*L_k2^((eta-1)/eta),eta/(eta-1),1)))"}
-, {"eq": 14, "col": 16, "var": "L_k2", "val": "(-(get_power_deriv(alpha_k1*L_k1^((eta-1)/eta)+alpha_k2*L_k2^((eta-1)/eta),eta/(eta-1),1)*alpha_k2*get_power_deriv(L_k2,(eta-1)/eta,1)))"}
-, {"eq": 14, "col": 17, "var": "alpha_k2", "val": "(-(L_k2^((eta-1)/eta)*get_power_deriv(alpha_k1*L_k1^((eta-1)/eta)+alpha_k2*L_k2^((eta-1)/eta),eta/(eta-1),1)))"}
-, {"eq": 15, "col": 13, "var": "L_k1", "val": "1"}
-, {"eq": 15, "col": 24, "var": "b_1_k1", "val": "(-(alpha_1_k1*get_power_deriv(b_1_k1,(rho_k1-1)/rho_k1,1)*get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)))"}
-, {"eq": 15, "col": 25, "var": "alpha_1_k1", "val": "(-(b_1_k1^((rho_k1-1)/rho_k1)*get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)))"}
-, {"eq": 15, "col": 26, "var": "b_2_k1", "val": "(-(get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)*alpha_2_k1*get_power_deriv(b_2_k1,(rho_k1-1)/rho_k1,1)))"}
-, {"eq": 15, "col": 27, "var": "alpha_2_k1", "val": "(-(b_2_k1^((rho_k1-1)/rho_k1)*get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)))"}
-, {"eq": 15, "col": 28, "var": "b_3_k1", "val": "(-(get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)*alpha_3_k1*get_power_deriv(b_3_k1,(rho_k1-1)/rho_k1,1)))"}
-, {"eq": 15, "col": 29, "var": "alpha_3_k1", "val": "(-(b_3_k1^((rho_k1-1)/rho_k1)*get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)))"}
-, {"eq": 16, "col": 16, "var": "L_k2", "val": "1"}
-, {"eq": 16, "col": 30, "var": "b_3_k2", "val": "(-(alpha_3_k2*get_power_deriv(b_3_k2,(rho_k2-1)/rho_k2,1)*get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)))"}
-, {"eq": 16, "col": 31, "var": "alpha_3_k2", "val": "(-(b_3_k2^((rho_k2-1)/rho_k2)*get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)))"}
-, {"eq": 16, "col": 32, "var": "b_4_k2", "val": "(-(get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)*alpha_4_k2*get_power_deriv(b_4_k2,(rho_k2-1)/rho_k2,1)))"}
-, {"eq": 16, "col": 33, "var": "alpha_4_k2", "val": "(-(b_4_k2^((rho_k2-1)/rho_k2)*get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)))"}
-, {"eq": 16, "col": 34, "var": "b_5_k2", "val": "(-(get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)*alpha_5_k2*get_power_deriv(b_5_k2,(rho_k2-1)/rho_k2,1)))"}
-, {"eq": 16, "col": 35, "var": "alpha_5_k2", "val": "(-(b_5_k2^((rho_k2-1)/rho_k2)*get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)))"}
-, {"eq": 17, "col": 14, "var": "alpha_k1", "val": "1"}
-, {"eq": 17, "col": 15, "var": "omega_a_basket_1", "val": "(-(((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*alpha_bar_k1*delta_k1*exp(omega_a_basket_1*delta_k1)-alpha_bar_k1*exp(omega_a_basket_1*delta_k1)*alpha_bar_k1*delta_k1*exp(omega_a_basket_1*delta_k1))/((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2)))))"}
-, {"eq": 17, "col": 18, "var": "omega_a_basket_2", "val": "(-((-(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)*alpha_bar_k2*delta_k2*exp(omega_a_basket_2*delta_k2)))/((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2)))))"}
-, {"eq": 18, "col": 15, "var": "omega_a_basket_1", "val": "(-((-(alpha_bar_k2*exp(omega_a_basket_2*delta_k2)*alpha_bar_k1*delta_k1*exp(omega_a_basket_1*delta_k1)))/((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2)))))"}
-, {"eq": 18, "col": 17, "var": "alpha_k2", "val": "1"}
-, {"eq": 18, "col": 18, "var": "omega_a_basket_2", "val": "(-(((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*alpha_bar_k2*delta_k2*exp(omega_a_basket_2*delta_k2)-alpha_bar_k2*exp(omega_a_basket_2*delta_k2)*alpha_bar_k2*delta_k2*exp(omega_a_basket_2*delta_k2))/((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2)))))"}
-, {"eq": 19, "col": 4, "var": "omega_a_1", "val": "(-(((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*alpha_bar_1_k1*delta_idio_1*exp(omega_a_1*delta_idio_1)-alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)*alpha_bar_1_k1*delta_idio_1*exp(omega_a_1*delta_idio_1))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
-, {"eq": 19, "col": 6, "var": "omega_a_2", "val": "(-((-(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)*alpha_bar_2_k1*delta_idio_2*exp(omega_a_2*delta_idio_2)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
-, {"eq": 19, "col": 8, "var": "omega_a_3", "val": "(-((-(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)*alpha_bar_3_k1*delta_idio_3*exp(omega_a_3*delta_idio_3)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
-, {"eq": 19, "col": 25, "var": "alpha_1_k1", "val": "1"}
-, {"eq": 20, "col": 4, "var": "omega_a_1", "val": "(-((-(alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)*alpha_bar_1_k1*delta_idio_1*exp(omega_a_1*delta_idio_1)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
-, {"eq": 20, "col": 6, "var": "omega_a_2", "val": "(-(((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*alpha_bar_2_k1*delta_idio_2*exp(omega_a_2*delta_idio_2)-alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)*alpha_bar_2_k1*delta_idio_2*exp(omega_a_2*delta_idio_2))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
-, {"eq": 20, "col": 8, "var": "omega_a_3", "val": "(-((-(alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)*alpha_bar_3_k1*delta_idio_3*exp(omega_a_3*delta_idio_3)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
-, {"eq": 20, "col": 27, "var": "alpha_2_k1", "val": "1"}
-, {"eq": 21, "col": 4, "var": "omega_a_1", "val": "(-((-(alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)*alpha_bar_1_k1*delta_idio_1*exp(omega_a_1*delta_idio_1)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
-, {"eq": 21, "col": 6, "var": "omega_a_2", "val": "(-((-(alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)*alpha_bar_2_k1*delta_idio_2*exp(omega_a_2*delta_idio_2)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
-, {"eq": 21, "col": 8, "var": "omega_a_3", "val": "(-(((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*alpha_bar_3_k1*delta_idio_3*exp(omega_a_3*delta_idio_3)-alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)*alpha_bar_3_k1*delta_idio_3*exp(omega_a_3*delta_idio_3))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
-, {"eq": 21, "col": 29, "var": "alpha_3_k1", "val": "1"}
-, {"eq": 22, "col": 8, "var": "omega_a_3", "val": "(-(((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*alpha_bar_3_k2*delta_idio_3*exp(omega_a_3*delta_idio_3)-exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2*alpha_bar_3_k2*delta_idio_3*exp(omega_a_3*delta_idio_3))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
-, {"eq": 22, "col": 10, "var": "omega_a_4", "val": "(-((-(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2*alpha_bar_4_k2*delta_idio_4*exp(omega_a_4*delta_idio_4)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
-, {"eq": 22, "col": 12, "var": "omega_a_5", "val": "(-((-(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2*alpha_bar_5_k2*delta_idio_5*exp(omega_a_5*delta_idio_5)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
-, {"eq": 22, "col": 31, "var": "alpha_3_k2", "val": "1"}
-, {"eq": 23, "col": 8, "var": "omega_a_3", "val": "(-((-(alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)*alpha_bar_3_k2*delta_idio_3*exp(omega_a_3*delta_idio_3)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
-, {"eq": 23, "col": 10, "var": "omega_a_4", "val": "(-(((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*alpha_bar_4_k2*delta_idio_4*exp(omega_a_4*delta_idio_4)-alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)*alpha_bar_4_k2*delta_idio_4*exp(omega_a_4*delta_idio_4))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
-, {"eq": 23, "col": 12, "var": "omega_a_5", "val": "(-((-(alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)*alpha_bar_5_k2*delta_idio_5*exp(omega_a_5*delta_idio_5)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
-, {"eq": 23, "col": 33, "var": "alpha_4_k2", "val": "1"}
-, {"eq": 24, "col": 8, "var": "omega_a_3", "val": "(-((-(alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)*alpha_bar_3_k2*delta_idio_3*exp(omega_a_3*delta_idio_3)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
-, {"eq": 24, "col": 10, "var": "omega_a_4", "val": "(-((-(alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)*alpha_bar_4_k2*delta_idio_4*exp(omega_a_4*delta_idio_4)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
-, {"eq": 24, "col": 12, "var": "omega_a_5", "val": "(-(((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*alpha_bar_5_k2*delta_idio_5*exp(omega_a_5*delta_idio_5)-alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)*alpha_bar_5_k2*delta_idio_5*exp(omega_a_5*delta_idio_5))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
-, {"eq": 24, "col": 35, "var": "alpha_5_k2", "val": "1"}
-, {"eq": 25, "col": 3, "var": "omega_G_1", "val": "phi_1"}
-, {"eq": 25, "col": 24, "var": "b_1_k1", "val": "(-1)"}
-, {"eq": 26, "col": 5, "var": "omega_G_2", "val": "phi_2"}
-, {"eq": 26, "col": 26, "var": "b_2_k1", "val": "(-1)"}
-, {"eq": 27, "col": 7, "var": "omega_G_3", "val": "phi_3"}
-, {"eq": 27, "col": 28, "var": "b_3_k1", "val": "(-1)"}
-, {"eq": 27, "col": 30, "var": "b_3_k2", "val": "(-1)"}
-, {"eq": 28, "col": 9, "var": "omega_G_4", "val": "phi_4"}
-, {"eq": 28, "col": 32, "var": "b_4_k2", "val": "(-1)"}
-, {"eq": 29, "col": 11, "var": "omega_G_5", "val": "phi_5"}
-, {"eq": 29, "col": 34, "var": "b_5_k2", "val": "(-1)"}
-, {"eq": 30, "col": 1, "var": "L", "val": "(-(b_1_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*psi/c^(-sigma)*alpha_k1*alpha_1_k1*get_power_deriv(L,1/eta-gamma,1)))"}
-, {"eq": 30, "col": 2, "var": "c", "val": "(-(b_1_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*alpha_1_k1*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
-, {"eq": 30, "col": 13, "var": "L_k1", "val": "(-(b_1_k1^((-1)/rho_k1)*psi/c^(-sigma)*alpha_k1*alpha_1_k1*L^(1/eta-gamma)*get_power_deriv(L_k1,1/rho_k1-1/eta,1)))"}
-, {"eq": 30, "col": 14, "var": "alpha_k1", "val": "(-(b_1_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_1_k1*psi/c^(-sigma)))"}
-, {"eq": 30, "col": 19, "var": "R_1", "val": "(-beta)"}
-, {"eq": 30, "col": 24, "var": "b_1_k1", "val": "(-(psi/c^(-sigma)*alpha_k1*alpha_1_k1*L^(1/eta-gamma)*L_k1^(1/rho_k1-1/eta)*get_power_deriv(b_1_k1,(-1)/rho_k1,1)))"}
-, {"eq": 30, "col": 25, "var": "alpha_1_k1", "val": "(-(b_1_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*psi/c^(-sigma)))"}
-, {"eq": 31, "col": 1, "var": "L", "val": "(-(b_2_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*psi/c^(-sigma)*alpha_k1*alpha_2_k1*get_power_deriv(L,1/eta-gamma,1)))"}
-, {"eq": 31, "col": 2, "var": "c", "val": "(-(b_2_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*alpha_2_k1*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
-, {"eq": 31, "col": 13, "var": "L_k1", "val": "(-(b_2_k1^((-1)/rho_k1)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k1*alpha_2_k1*get_power_deriv(L_k1,1/rho_k1-1/eta,1)))"}
-, {"eq": 31, "col": 14, "var": "alpha_k1", "val": "(-(b_2_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_2_k1*psi/c^(-sigma)))"}
-, {"eq": 31, "col": 20, "var": "R_2", "val": "(-beta)"}
-, {"eq": 31, "col": 26, "var": "b_2_k1", "val": "(-(L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k1*alpha_2_k1*get_power_deriv(b_2_k1,(-1)/rho_k1,1)))"}
-, {"eq": 31, "col": 27, "var": "alpha_2_k1", "val": "(-(b_2_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*psi/c^(-sigma)))"}
-, {"eq": 32, "col": 1, "var": "L", "val": "(-(b_3_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*psi/c^(-sigma)*alpha_k1*alpha_3_k1*get_power_deriv(L,1/eta-gamma,1)))"}
-, {"eq": 32, "col": 2, "var": "c", "val": "(-(b_3_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*alpha_3_k1*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
-, {"eq": 32, "col": 13, "var": "L_k1", "val": "(-(b_3_k1^((-1)/rho_k1)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k1*alpha_3_k1*get_power_deriv(L_k1,1/rho_k1-1/eta,1)))"}
-, {"eq": 32, "col": 14, "var": "alpha_k1", "val": "(-(b_3_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_3_k1*psi/c^(-sigma)))"}
-, {"eq": 32, "col": 21, "var": "R_3", "val": "(-beta)"}
-, {"eq": 32, "col": 28, "var": "b_3_k1", "val": "(-(L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k1*alpha_3_k1*get_power_deriv(b_3_k1,(-1)/rho_k1,1)))"}
-, {"eq": 32, "col": 29, "var": "alpha_3_k1", "val": "(-(b_3_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*psi/c^(-sigma)))"}
-, {"eq": 33, "col": 1, "var": "L", "val": "(-(b_3_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*psi/c^(-sigma)*alpha_k2*alpha_3_k2*get_power_deriv(L,1/eta-gamma,1)))"}
-, {"eq": 33, "col": 2, "var": "c", "val": "(-(b_3_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*alpha_3_k2*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
-, {"eq": 33, "col": 16, "var": "L_k2", "val": "(-(b_3_k2^((-1)/rho_k2)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_3_k2*get_power_deriv(L_k2,1/rho_k2-1/eta,1)))"}
-, {"eq": 33, "col": 17, "var": "alpha_k2", "val": "(-(b_3_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_3_k2*psi/c^(-sigma)))"}
-, {"eq": 33, "col": 21, "var": "R_3", "val": "(-beta)"}
-, {"eq": 33, "col": 30, "var": "b_3_k2", "val": "(-(L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_3_k2*L_k2^(1/rho_k2-1/eta)*get_power_deriv(b_3_k2,(-1)/rho_k2,1)))"}
-, {"eq": 33, "col": 31, "var": "alpha_3_k2", "val": "(-(b_3_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*psi/c^(-sigma)))"}
-, {"eq": 34, "col": 1, "var": "L", "val": "(-(b_4_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*psi/c^(-sigma)*alpha_k2*alpha_4_k2*get_power_deriv(L,1/eta-gamma,1)))"}
-, {"eq": 34, "col": 2, "var": "c", "val": "(-(b_4_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*alpha_4_k2*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
-, {"eq": 34, "col": 16, "var": "L_k2", "val": "(-(b_4_k2^((-1)/rho_k2)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_4_k2*get_power_deriv(L_k2,1/rho_k2-1/eta,1)))"}
-, {"eq": 34, "col": 17, "var": "alpha_k2", "val": "(-(b_4_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_4_k2*psi/c^(-sigma)))"}
-, {"eq": 34, "col": 22, "var": "R_4", "val": "(-beta)"}
-, {"eq": 34, "col": 32, "var": "b_4_k2", "val": "(-(L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_4_k2*get_power_deriv(b_4_k2,(-1)/rho_k2,1)))"}
-, {"eq": 34, "col": 33, "var": "alpha_4_k2", "val": "(-(b_4_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*psi/c^(-sigma)))"}
-, {"eq": 35, "col": 1, "var": "L", "val": "(-(b_5_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*psi/c^(-sigma)*alpha_k2*alpha_5_k2*get_power_deriv(L,1/eta-gamma,1)))"}
-, {"eq": 35, "col": 2, "var": "c", "val": "(-(b_5_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*alpha_5_k2*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
-, {"eq": 35, "col": 16, "var": "L_k2", "val": "(-(b_5_k2^((-1)/rho_k2)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_5_k2*get_power_deriv(L_k2,1/rho_k2-1/eta,1)))"}
-, {"eq": 35, "col": 17, "var": "alpha_k2", "val": "(-(b_5_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_5_k2*psi/c^(-sigma)))"}
-, {"eq": 35, "col": 23, "var": "R_5", "val": "(-beta)"}
-, {"eq": 35, "col": 34, "var": "b_5_k2", "val": "(-(L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_5_k2*get_power_deriv(b_5_k2,(-1)/rho_k2,1)))"}
-, {"eq": 35, "col": 35, "var": "alpha_5_k2", "val": "(-(b_5_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*psi/c^(-sigma)))"}
-]}, "external_functions_temporary_terms_hessian": [], "temporary_terms_hessian": [], "hessian": {  "nrows": 35, "ncols": 1225, "entries": []}, "external_functions_temporary_terms_third_derivative": [], "temporary_terms_third_derivative": [], "third_derivative": {  "nrows": 35, "ncols": 42875, "entries": []}}}
+, {"eq": 12, "col": 16, "var": "omega_a_basket_1", "val": "1-rho_a"}
+, {"eq": 13, "col": 19, "var": "omega_a_basket_2", "val": "1-rho_a"}
+, {"eq": 14, "col": 13, "var": "omega_mp_1", "val": "1-rho_mp"}
+, {"eq": 15, "col": 1, "var": "L", "val": "1"}
+, {"eq": 15, "col": 14, "var": "L_k1", "val": "(-(alpha_k1*get_power_deriv(L_k1,(eta-1)/eta,1)*get_power_deriv(alpha_k1*L_k1^((eta-1)/eta)+alpha_k2*L_k2^((eta-1)/eta),eta/(eta-1),1)))"}
+, {"eq": 15, "col": 15, "var": "alpha_k1", "val": "(-(L_k1^((eta-1)/eta)*get_power_deriv(alpha_k1*L_k1^((eta-1)/eta)+alpha_k2*L_k2^((eta-1)/eta),eta/(eta-1),1)))"}
+, {"eq": 15, "col": 17, "var": "L_k2", "val": "(-(get_power_deriv(alpha_k1*L_k1^((eta-1)/eta)+alpha_k2*L_k2^((eta-1)/eta),eta/(eta-1),1)*alpha_k2*get_power_deriv(L_k2,(eta-1)/eta,1)))"}
+, {"eq": 15, "col": 18, "var": "alpha_k2", "val": "(-(L_k2^((eta-1)/eta)*get_power_deriv(alpha_k1*L_k1^((eta-1)/eta)+alpha_k2*L_k2^((eta-1)/eta),eta/(eta-1),1)))"}
+, {"eq": 16, "col": 14, "var": "L_k1", "val": "1"}
+, {"eq": 16, "col": 25, "var": "b_1_k1", "val": "(-(alpha_1_k1*get_power_deriv(b_1_k1,(rho_k1-1)/rho_k1,1)*get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)))"}
+, {"eq": 16, "col": 26, "var": "alpha_1_k1", "val": "(-(b_1_k1^((rho_k1-1)/rho_k1)*get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)))"}
+, {"eq": 16, "col": 27, "var": "b_2_k1", "val": "(-(get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)*alpha_2_k1*get_power_deriv(b_2_k1,(rho_k1-1)/rho_k1,1)))"}
+, {"eq": 16, "col": 28, "var": "alpha_2_k1", "val": "(-(b_2_k1^((rho_k1-1)/rho_k1)*get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)))"}
+, {"eq": 16, "col": 29, "var": "b_3_k1", "val": "(-(get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)*alpha_3_k1*get_power_deriv(b_3_k1,(rho_k1-1)/rho_k1,1)))"}
+, {"eq": 16, "col": 30, "var": "alpha_3_k1", "val": "(-(b_3_k1^((rho_k1-1)/rho_k1)*get_power_deriv(alpha_1_k1*b_1_k1^((rho_k1-1)/rho_k1)+alpha_2_k1*b_2_k1^((rho_k1-1)/rho_k1)+alpha_3_k1*b_3_k1^((rho_k1-1)/rho_k1),rho_k1/(rho_k1-1),1)))"}
+, {"eq": 17, "col": 17, "var": "L_k2", "val": "1"}
+, {"eq": 17, "col": 31, "var": "b_3_k2", "val": "(-(alpha_3_k2*get_power_deriv(b_3_k2,(rho_k2-1)/rho_k2,1)*get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)))"}
+, {"eq": 17, "col": 32, "var": "alpha_3_k2", "val": "(-(b_3_k2^((rho_k2-1)/rho_k2)*get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)))"}
+, {"eq": 17, "col": 33, "var": "b_4_k2", "val": "(-(get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)*alpha_4_k2*get_power_deriv(b_4_k2,(rho_k2-1)/rho_k2,1)))"}
+, {"eq": 17, "col": 34, "var": "alpha_4_k2", "val": "(-(b_4_k2^((rho_k2-1)/rho_k2)*get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)))"}
+, {"eq": 17, "col": 35, "var": "b_5_k2", "val": "(-(get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)*alpha_5_k2*get_power_deriv(b_5_k2,(rho_k2-1)/rho_k2,1)))"}
+, {"eq": 17, "col": 36, "var": "alpha_5_k2", "val": "(-(b_5_k2^((rho_k2-1)/rho_k2)*get_power_deriv(alpha_3_k2*b_3_k2^((rho_k2-1)/rho_k2)+alpha_4_k2*b_4_k2^((rho_k2-1)/rho_k2)+alpha_5_k2*b_5_k2^((rho_k2-1)/rho_k2),rho_k2/(rho_k2-1),1)))"}
+, {"eq": 18, "col": 15, "var": "alpha_k1", "val": "1"}
+, {"eq": 18, "col": 16, "var": "omega_a_basket_1", "val": "(-(((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*alpha_bar_k1*delta_k1*exp(omega_a_basket_1*delta_k1)-alpha_bar_k1*exp(omega_a_basket_1*delta_k1)*alpha_bar_k1*delta_k1*exp(omega_a_basket_1*delta_k1))/((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2)))))"}
+, {"eq": 18, "col": 19, "var": "omega_a_basket_2", "val": "(-((-(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)*alpha_bar_k2*delta_k2*exp(omega_a_basket_2*delta_k2)))/((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2)))))"}
+, {"eq": 19, "col": 16, "var": "omega_a_basket_1", "val": "(-((-(alpha_bar_k2*exp(omega_a_basket_2*delta_k2)*alpha_bar_k1*delta_k1*exp(omega_a_basket_1*delta_k1)))/((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2)))))"}
+, {"eq": 19, "col": 18, "var": "alpha_k2", "val": "1"}
+, {"eq": 19, "col": 19, "var": "omega_a_basket_2", "val": "(-(((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*alpha_bar_k2*delta_k2*exp(omega_a_basket_2*delta_k2)-alpha_bar_k2*exp(omega_a_basket_2*delta_k2)*alpha_bar_k2*delta_k2*exp(omega_a_basket_2*delta_k2))/((alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2))*(alpha_bar_k1*exp(omega_a_basket_1*delta_k1)+alpha_bar_k2*exp(omega_a_basket_2*delta_k2)))))"}
+, {"eq": 20, "col": 4, "var": "omega_a_1", "val": "(-(((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*alpha_bar_1_k1*delta_idio_1*exp(omega_a_1*delta_idio_1)-alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)*alpha_bar_1_k1*delta_idio_1*exp(omega_a_1*delta_idio_1))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
+, {"eq": 20, "col": 6, "var": "omega_a_2", "val": "(-((-(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)*alpha_bar_2_k1*delta_idio_2*exp(omega_a_2*delta_idio_2)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
+, {"eq": 20, "col": 8, "var": "omega_a_3", "val": "(-((-(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)*alpha_bar_3_k1*delta_idio_3*exp(omega_a_3*delta_idio_3)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
+, {"eq": 20, "col": 26, "var": "alpha_1_k1", "val": "1"}
+, {"eq": 21, "col": 4, "var": "omega_a_1", "val": "(-((-(alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)*alpha_bar_1_k1*delta_idio_1*exp(omega_a_1*delta_idio_1)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
+, {"eq": 21, "col": 6, "var": "omega_a_2", "val": "(-(((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*alpha_bar_2_k1*delta_idio_2*exp(omega_a_2*delta_idio_2)-alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)*alpha_bar_2_k1*delta_idio_2*exp(omega_a_2*delta_idio_2))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
+, {"eq": 21, "col": 8, "var": "omega_a_3", "val": "(-((-(alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)*alpha_bar_3_k1*delta_idio_3*exp(omega_a_3*delta_idio_3)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
+, {"eq": 21, "col": 28, "var": "alpha_2_k1", "val": "1"}
+, {"eq": 22, "col": 4, "var": "omega_a_1", "val": "(-((-(alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)*alpha_bar_1_k1*delta_idio_1*exp(omega_a_1*delta_idio_1)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
+, {"eq": 22, "col": 6, "var": "omega_a_2", "val": "(-((-(alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)*alpha_bar_2_k1*delta_idio_2*exp(omega_a_2*delta_idio_2)))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
+, {"eq": 22, "col": 8, "var": "omega_a_3", "val": "(-(((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*alpha_bar_3_k1*delta_idio_3*exp(omega_a_3*delta_idio_3)-alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)*alpha_bar_3_k1*delta_idio_3*exp(omega_a_3*delta_idio_3))/((alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3))*(alpha_bar_1_k1*exp(omega_a_1*delta_idio_1)+alpha_bar_2_k1*exp(omega_a_2*delta_idio_2)+alpha_bar_3_k1*exp(omega_a_3*delta_idio_3)))))"}
+, {"eq": 22, "col": 30, "var": "alpha_3_k1", "val": "1"}
+, {"eq": 23, "col": 8, "var": "omega_a_3", "val": "(-(((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*alpha_bar_3_k2*delta_idio_3*exp(omega_a_3*delta_idio_3)-exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2*alpha_bar_3_k2*delta_idio_3*exp(omega_a_3*delta_idio_3))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
+, {"eq": 23, "col": 10, "var": "omega_a_4", "val": "(-((-(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2*alpha_bar_4_k2*delta_idio_4*exp(omega_a_4*delta_idio_4)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
+, {"eq": 23, "col": 12, "var": "omega_a_5", "val": "(-((-(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2*alpha_bar_5_k2*delta_idio_5*exp(omega_a_5*delta_idio_5)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
+, {"eq": 23, "col": 32, "var": "alpha_3_k2", "val": "1"}
+, {"eq": 24, "col": 8, "var": "omega_a_3", "val": "(-((-(alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)*alpha_bar_3_k2*delta_idio_3*exp(omega_a_3*delta_idio_3)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
+, {"eq": 24, "col": 10, "var": "omega_a_4", "val": "(-(((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*alpha_bar_4_k2*delta_idio_4*exp(omega_a_4*delta_idio_4)-alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)*alpha_bar_4_k2*delta_idio_4*exp(omega_a_4*delta_idio_4))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
+, {"eq": 24, "col": 12, "var": "omega_a_5", "val": "(-((-(alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)*alpha_bar_5_k2*delta_idio_5*exp(omega_a_5*delta_idio_5)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
+, {"eq": 24, "col": 34, "var": "alpha_4_k2", "val": "1"}
+, {"eq": 25, "col": 8, "var": "omega_a_3", "val": "(-((-(alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)*alpha_bar_3_k2*delta_idio_3*exp(omega_a_3*delta_idio_3)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
+, {"eq": 25, "col": 10, "var": "omega_a_4", "val": "(-((-(alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)*alpha_bar_4_k2*delta_idio_4*exp(omega_a_4*delta_idio_4)))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
+, {"eq": 25, "col": 12, "var": "omega_a_5", "val": "(-(((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*alpha_bar_5_k2*delta_idio_5*exp(omega_a_5*delta_idio_5)-alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)*alpha_bar_5_k2*delta_idio_5*exp(omega_a_5*delta_idio_5))/((exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5))*(exp(omega_a_3*delta_idio_3)*alpha_bar_3_k2+alpha_bar_4_k2*exp(omega_a_4*delta_idio_4)+alpha_bar_5_k2*exp(omega_a_5*delta_idio_5)))))"}
+, {"eq": 25, "col": 36, "var": "alpha_5_k2", "val": "1"}
+, {"eq": 26, "col": 3, "var": "omega_G_1", "val": "phi_1"}
+, {"eq": 26, "col": 13, "var": "omega_mp_1", "val": "1"}
+, {"eq": 26, "col": 25, "var": "b_1_k1", "val": "(-1)"}
+, {"eq": 27, "col": 5, "var": "omega_G_2", "val": "phi_2"}
+, {"eq": 27, "col": 27, "var": "b_2_k1", "val": "(-1)"}
+, {"eq": 28, "col": 7, "var": "omega_G_3", "val": "phi_3"}
+, {"eq": 28, "col": 13, "var": "omega_mp_1", "val": "(-1)"}
+, {"eq": 28, "col": 29, "var": "b_3_k1", "val": "(-1)"}
+, {"eq": 28, "col": 31, "var": "b_3_k2", "val": "(-1)"}
+, {"eq": 29, "col": 9, "var": "omega_G_4", "val": "phi_4"}
+, {"eq": 29, "col": 33, "var": "b_4_k2", "val": "(-1)"}
+, {"eq": 30, "col": 11, "var": "omega_G_5", "val": "phi_5"}
+, {"eq": 30, "col": 35, "var": "b_5_k2", "val": "(-1)"}
+, {"eq": 31, "col": 1, "var": "L", "val": "(-(b_1_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*psi/c^(-sigma)*alpha_k1*alpha_1_k1*get_power_deriv(L,1/eta-gamma,1)))"}
+, {"eq": 31, "col": 2, "var": "c", "val": "(-(b_1_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*alpha_1_k1*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
+, {"eq": 31, "col": 14, "var": "L_k1", "val": "(-(b_1_k1^((-1)/rho_k1)*psi/c^(-sigma)*alpha_k1*alpha_1_k1*L^(1/eta-gamma)*get_power_deriv(L_k1,1/rho_k1-1/eta,1)))"}
+, {"eq": 31, "col": 15, "var": "alpha_k1", "val": "(-(b_1_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_1_k1*psi/c^(-sigma)))"}
+, {"eq": 31, "col": 20, "var": "R_1", "val": "(-beta)"}
+, {"eq": 31, "col": 25, "var": "b_1_k1", "val": "(-(psi/c^(-sigma)*alpha_k1*alpha_1_k1*L^(1/eta-gamma)*L_k1^(1/rho_k1-1/eta)*get_power_deriv(b_1_k1,(-1)/rho_k1,1)))"}
+, {"eq": 31, "col": 26, "var": "alpha_1_k1", "val": "(-(b_1_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*psi/c^(-sigma)))"}
+, {"eq": 32, "col": 1, "var": "L", "val": "(-(b_2_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*psi/c^(-sigma)*alpha_k1*alpha_2_k1*get_power_deriv(L,1/eta-gamma,1)))"}
+, {"eq": 32, "col": 2, "var": "c", "val": "(-(b_2_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*alpha_2_k1*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
+, {"eq": 32, "col": 14, "var": "L_k1", "val": "(-(b_2_k1^((-1)/rho_k1)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k1*alpha_2_k1*get_power_deriv(L_k1,1/rho_k1-1/eta,1)))"}
+, {"eq": 32, "col": 15, "var": "alpha_k1", "val": "(-(b_2_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_2_k1*psi/c^(-sigma)))"}
+, {"eq": 32, "col": 21, "var": "R_2", "val": "(-beta)"}
+, {"eq": 32, "col": 27, "var": "b_2_k1", "val": "(-(L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k1*alpha_2_k1*get_power_deriv(b_2_k1,(-1)/rho_k1,1)))"}
+, {"eq": 32, "col": 28, "var": "alpha_2_k1", "val": "(-(b_2_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*psi/c^(-sigma)))"}
+, {"eq": 33, "col": 1, "var": "L", "val": "(-(b_3_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*psi/c^(-sigma)*alpha_k1*alpha_3_k1*get_power_deriv(L,1/eta-gamma,1)))"}
+, {"eq": 33, "col": 2, "var": "c", "val": "(-(b_3_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*alpha_3_k1*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
+, {"eq": 33, "col": 14, "var": "L_k1", "val": "(-(b_3_k1^((-1)/rho_k1)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k1*alpha_3_k1*get_power_deriv(L_k1,1/rho_k1-1/eta,1)))"}
+, {"eq": 33, "col": 15, "var": "alpha_k1", "val": "(-(b_3_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_3_k1*psi/c^(-sigma)))"}
+, {"eq": 33, "col": 22, "var": "R_3", "val": "(-beta)"}
+, {"eq": 33, "col": 29, "var": "b_3_k1", "val": "(-(L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k1*alpha_3_k1*get_power_deriv(b_3_k1,(-1)/rho_k1,1)))"}
+, {"eq": 33, "col": 30, "var": "alpha_3_k1", "val": "(-(b_3_k1^((-1)/rho_k1)*L_k1^(1/rho_k1-1/eta)*L^(1/eta-gamma)*alpha_k1*psi/c^(-sigma)))"}
+, {"eq": 34, "col": 1, "var": "L", "val": "(-(b_3_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*psi/c^(-sigma)*alpha_k2*alpha_3_k2*get_power_deriv(L,1/eta-gamma,1)))"}
+, {"eq": 34, "col": 2, "var": "c", "val": "(-(b_3_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*alpha_3_k2*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
+, {"eq": 34, "col": 17, "var": "L_k2", "val": "(-(b_3_k2^((-1)/rho_k2)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_3_k2*get_power_deriv(L_k2,1/rho_k2-1/eta,1)))"}
+, {"eq": 34, "col": 18, "var": "alpha_k2", "val": "(-(b_3_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_3_k2*psi/c^(-sigma)))"}
+, {"eq": 34, "col": 22, "var": "R_3", "val": "(-beta)"}
+, {"eq": 34, "col": 31, "var": "b_3_k2", "val": "(-(L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_3_k2*L_k2^(1/rho_k2-1/eta)*get_power_deriv(b_3_k2,(-1)/rho_k2,1)))"}
+, {"eq": 34, "col": 32, "var": "alpha_3_k2", "val": "(-(b_3_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*psi/c^(-sigma)))"}
+, {"eq": 35, "col": 1, "var": "L", "val": "(-(b_4_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*psi/c^(-sigma)*alpha_k2*alpha_4_k2*get_power_deriv(L,1/eta-gamma,1)))"}
+, {"eq": 35, "col": 2, "var": "c", "val": "(-(b_4_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*alpha_4_k2*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
+, {"eq": 35, "col": 17, "var": "L_k2", "val": "(-(b_4_k2^((-1)/rho_k2)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_4_k2*get_power_deriv(L_k2,1/rho_k2-1/eta,1)))"}
+, {"eq": 35, "col": 18, "var": "alpha_k2", "val": "(-(b_4_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_4_k2*psi/c^(-sigma)))"}
+, {"eq": 35, "col": 23, "var": "R_4", "val": "(-beta)"}
+, {"eq": 35, "col": 33, "var": "b_4_k2", "val": "(-(L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_4_k2*get_power_deriv(b_4_k2,(-1)/rho_k2,1)))"}
+, {"eq": 35, "col": 34, "var": "alpha_4_k2", "val": "(-(b_4_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*psi/c^(-sigma)))"}
+, {"eq": 36, "col": 1, "var": "L", "val": "(-(b_5_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*psi/c^(-sigma)*alpha_k2*alpha_5_k2*get_power_deriv(L,1/eta-gamma,1)))"}
+, {"eq": 36, "col": 2, "var": "c", "val": "(-(b_5_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*alpha_5_k2*(-(psi*get_power_deriv(c,(-sigma),1)))/(c^(-sigma)*c^(-sigma))))"}
+, {"eq": 36, "col": 17, "var": "L_k2", "val": "(-(b_5_k2^((-1)/rho_k2)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_5_k2*get_power_deriv(L_k2,1/rho_k2-1/eta,1)))"}
+, {"eq": 36, "col": 18, "var": "alpha_k2", "val": "(-(b_5_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_5_k2*psi/c^(-sigma)))"}
+, {"eq": 36, "col": 24, "var": "R_5", "val": "(-beta)"}
+, {"eq": 36, "col": 35, "var": "b_5_k2", "val": "(-(L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*psi/c^(-sigma)*alpha_k2*alpha_5_k2*get_power_deriv(b_5_k2,(-1)/rho_k2,1)))"}
+, {"eq": 36, "col": 36, "var": "alpha_5_k2", "val": "(-(b_5_k2^((-1)/rho_k2)*L_k2^(1/rho_k2-1/eta)*L^(1/eta-gamma)*alpha_k2*psi/c^(-sigma)))"}
+]}, "external_functions_temporary_terms_hessian": [], "temporary_terms_hessian": [], "hessian": {  "nrows": 36, "ncols": 1296, "entries": []}, "external_functions_temporary_terms_third_derivative": [], "temporary_terms_third_derivative": [], "third_derivative": {  "nrows": 36, "ncols": 46656, "entries": []}}}

@@ -5,6 +5,7 @@ var L c
     omega_G_3 omega_a_3
     omega_G_4 omega_a_4
     omega_G_5 omega_a_5
+    omega_mp_1
     L_k1 alpha_k1 omega_a_basket_1
     L_k2 alpha_k2 omega_a_basket_2
     R_1
@@ -28,19 +29,22 @@ varexo
     eps_G_5 eps_a_5
     eps_a_basket_1
     eps_a_basket_2
+    eps_mp_1
 ;
 
 parameters
-    sigma
     psi
-    y
+    sig_a
+    eta
+    beta
+    sigma
+    rho_mp
     rho_G
     rho_a
     gamma
-    sig_a
-    eta
     sig_G
-    beta
+    sig_mp
+    y
     rho_k1 alpha_bar_k1 delta_k1
     rho_k2 alpha_bar_k2 delta_k2
     b_bar_1 phi_1 delta_idio_1
@@ -57,16 +61,18 @@ parameters
 ;
 
 // CALIBRATION
-sigma = 2.0;
 psi = 0.5;
-y = 1.0;
+sig_a = 0.01;
+eta = 1.5;
+beta = 0.99;
+sigma = 2.0;
+rho_mp = 0.9;
 rho_G = 0.9;
 rho_a = 0.9;
 gamma = 2.0;
-sig_a = 0.01;
-eta = 1.5;
 sig_G = 0.01;
-beta = 0.99;
+sig_mp = 0.05;
+y = 1.0;
 rho_k1 = 10.0; alpha_bar_k1 = 0.5; delta_k1 = 0.2;
 rho_k2 = 2.0; alpha_bar_k2 = 0.5; delta_k2 = 0.8;
 b_bar_1 = 2.0; phi_1 = 0.1; delta_idio_1 = 0.1;
@@ -95,6 +101,7 @@ model;
     omega_a_5 = rho_a * omega_a_5(-1) + sig_a * eps_a_5;
     omega_a_basket_1 = rho_a * omega_a_basket_1(-1) + sig_a * eps_a_basket_1;
     omega_a_basket_2 = rho_a * omega_a_basket_2(-1) + sig_a * eps_a_basket_2;
+    omega_mp_1 = rho_mp * omega_mp_1(-1) + sig_mp * eps_mp_1;
     L = ( (alpha_k1 * L_k1^((eta-1)/eta)) + (alpha_k2 * L_k2^((eta-1)/eta)) )^(eta/(eta-1));
     L_k1 = ( (alpha_1_k1 * b_1_k1^((rho_k1-1)/rho_k1)) + (alpha_2_k1 * b_2_k1^((rho_k1-1)/rho_k1)) + (alpha_3_k1 * b_3_k1^((rho_k1-1)/rho_k1)) )^(rho_k1/(rho_k1-1));
     L_k2 = ( (alpha_3_k2 * b_3_k2^((rho_k2-1)/rho_k2)) + (alpha_4_k2 * b_4_k2^((rho_k2-1)/rho_k2)) + (alpha_5_k2 * b_5_k2^((rho_k2-1)/rho_k2)) )^(rho_k2/(rho_k2-1));
@@ -106,9 +113,9 @@ model;
     alpha_3_k2 = (alpha_bar_3_k2 * exp(delta_idio_3 * omega_a_3)) / ((alpha_bar_3_k2 * exp(delta_idio_3 * omega_a_3)) + (alpha_bar_4_k2 * exp(delta_idio_4 * omega_a_4)) + (alpha_bar_5_k2 * exp(delta_idio_5 * omega_a_5)));
     alpha_4_k2 = (alpha_bar_4_k2 * exp(delta_idio_4 * omega_a_4)) / ((alpha_bar_3_k2 * exp(delta_idio_3 * omega_a_3)) + (alpha_bar_4_k2 * exp(delta_idio_4 * omega_a_4)) + (alpha_bar_5_k2 * exp(delta_idio_5 * omega_a_5)));
     alpha_5_k2 = (alpha_bar_5_k2 * exp(delta_idio_5 * omega_a_5)) / ((alpha_bar_3_k2 * exp(delta_idio_3 * omega_a_3)) + (alpha_bar_4_k2 * exp(delta_idio_4 * omega_a_4)) + (alpha_bar_5_k2 * exp(delta_idio_5 * omega_a_5)));
-    b_bar_1 + phi_1 * omega_G_1 = b_1_k1;
+    b_bar_1 + phi_1 * omega_G_1 + omega_mp_1 = b_1_k1;
     b_bar_2 + phi_2 * omega_G_2 = b_2_k1;
-    b_bar_3 + phi_3 * omega_G_3 = b_3_k1 + b_3_k2;
+    b_bar_3 + phi_3 * omega_G_3 - omega_mp_1 = b_3_k1 + b_3_k2;
     b_bar_4 + phi_4 * omega_G_4 = b_4_k2;
     b_bar_5 + phi_5 * omega_G_5 = b_5_k2;
     1 - beta * R_1 = (psi / c^(-sigma)) * (alpha_k1 * alpha_1_k1) * L^(1/eta - gamma) * L_k1^(1/rho_k1 - 1/eta) * b_1_k1^(-1/rho_k1);
@@ -128,6 +135,7 @@ initval;
     omega_G_5 = 0; omega_a_5 = 0;
     omega_a_basket_1 = 0;
     omega_a_basket_2 = 0;
+    omega_mp_1 = 0;
     R_1 = 1.0/beta - 0.005;
     b_1_k1 = 2.0; alpha_1_k1 = 0.3333333333333333;
     R_2 = 1.0/beta - 0.005;
@@ -151,8 +159,9 @@ shocks;
     var eps_G_5 = 1; var eps_a_5 = 1;
     var eps_a_basket_1 = 1;
     var eps_a_basket_2 = 1;
+    var eps_mp_1 = 1;
 end;
 
 steady;
 check;
-stoch_simul(order=1, drop=100, periods=300, irf=20, graph_format=pdf);
+stoch_simul(order=1, drop=100, periods=1000, irf=100, graph_format=pdf);

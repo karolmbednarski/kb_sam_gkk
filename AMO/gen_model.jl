@@ -313,8 +313,15 @@ try
             if !haskey(decomp_dict, var_name)
                 decomp_dict[var_name] = Dict{String, Float64}()
             end
-            
+        # Check if everrythign all right
+        last_val = data_mat[end, i]
+        if abs(last_val) > 1e-4
+        println("⚠️ Warning: IRF for $var_name to $shock_name has not decayed to zero (Val: $last_val). Decomposition may be biased.")
+        end
+
+local sum_sq = sum(data_mat[:, i] .^ 2)
             # Calculate Sum of Squared Impulse Responses
+            
             local sum_sq = sum(data_mat[:, i] .^ 2)
             decomp_dict[var_name][shock_name] = sum_sq
         end
